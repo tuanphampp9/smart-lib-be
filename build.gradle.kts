@@ -33,7 +33,11 @@ dependencies {
 	runtimeOnly("com.mysql:mysql-connector-j")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	implementation("com.cloudinary:cloudinary-http44:1.33.0")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+	// MapStruct
+	implementation("org.mapstruct:mapstruct:1.6.2")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
 }
 
 tasks.withType<Test> {

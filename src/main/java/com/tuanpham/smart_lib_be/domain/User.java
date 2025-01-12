@@ -3,28 +3,13 @@ package com.tuanpham.smart_lib_be.domain;
 
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import com.tuanpham.smart_lib_be.util.constant.GenderEnum;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.List;
 
 //domain driven design
 @Entity
@@ -33,17 +18,26 @@ import java.util.List;
 @Setter
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    @NotBlank(message = "fullName doesn't empty")
+    private String fullName;
     @NotBlank(message = "email doesn't empty")
     private String email;
-    @NotBlank(message = "password doesn't empty")
     private String password;
+    @NotBlank(message = "portraitImg doesn't empty")
+    private String portraitImg;
+    @NotBlank(message = "DOB doesn't empty")
+    private String dob;
+    @NotBlank(message = "phone doesn't empty")
+    private String phone;
+    @NotBlank(message = "phone doesn't empty")
+    private String identityCardNumber;
+    private boolean active;
 
-    private int age;
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;
+    @NotBlank(message = "phone doesn't empty")
     private String address;
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
@@ -59,6 +53,10 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, optional = true)
+    private CardRead cardRead;
 
     @PrePersist // action before save
     public void handleBeforeCreate() {

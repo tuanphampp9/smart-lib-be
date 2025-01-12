@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email new card reader</title>
+</head>
+<body>
+    Chúc mừng <b th:text="${fullName}"></b> đã tạo thẻ đọc thành công, giờ đây bạn có thể vào thư viện để đọc/mượn sách<br/>
+    tài khoản đăng nhập vào website của thư viện là email của bạn <br/>
+    Mật khẩu của bạn là: <b th:text="${password}"></b><br/>
+    Bạn có thể đổi mật khẩu mới sau khi đăng nhập vào website
+</body>
+</html>

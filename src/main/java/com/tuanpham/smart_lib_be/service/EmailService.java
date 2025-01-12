@@ -27,17 +27,17 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
-    public void sendSimpleEmail() {
+    public void sendSimpleEmail(String to, String subject, String content) {
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo("tuanphampp9@gmail.com");
-        msg.setSubject("Testing from Spring Boot");
-        msg.setText("Hello World \n Spring Boot Email");
+        msg.setTo(to);
+        msg.setSubject(subject);
+        msg.setText(content);
         this.mailSender.send(msg);
     }
 
     public void sendEmailSync(String to, String subject, String content, boolean isMultipart,
             boolean isHtml) {
-        // Prepare message using a Spring helper
+        // Prepare a message using a Spring helper
         MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage,
@@ -52,12 +52,11 @@ public class EmailService {
     }
 
     @Async
-    public void sendEmailFromTemplateSync(String to, String subject, String templateName, String username,
-            Object value) {
+    public void sendEmailCreateCardReader(String to, String subject, String templateName, String fullName, String password) {
         Context context = new Context();
-        context.setVariable("name", username);
-        context.setVariable("jobs", value);
-        // convert from html to text
+        context.setVariable("fullName", fullName);
+        context.setVariable("password", password);
+        // convert from HTML to text
         String content = this.templateEngine.process(templateName, context);
         this.sendEmailSync(to, subject, content, false, true);
     }

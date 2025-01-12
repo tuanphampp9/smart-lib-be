@@ -10,14 +10,13 @@ import java.time.Instant;
 @Getter
 @Setter
 public class ResUpdateDTO {
-    private long id;
-    private String name;
-    private int age;
+    private String id;
+    private String fullName;
     private String address;
     private GenderEnum gender;
+    private String portraitImg;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant updatedAt;
-    private company company;
 
     @Getter
     @Setter

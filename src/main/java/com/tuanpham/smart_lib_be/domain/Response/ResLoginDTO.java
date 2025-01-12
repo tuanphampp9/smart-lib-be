@@ -19,7 +19,7 @@ public class ResLoginDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserLogin {
-        private long id;
+        private String id;
         private String email;
         private String name;
         private Role role;
@@ -38,9 +38,10 @@ public class ResLoginDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class UserInsideToken {
-        private long id;
+        private String id;
         private String email;
         private String name;
+        private String roleName;
     }
 
 }
