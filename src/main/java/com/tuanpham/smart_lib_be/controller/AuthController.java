@@ -3,7 +3,11 @@ package com.tuanpham.smart_lib_be.controller;
 import com.tuanpham.smart_lib_be.domain.Request.ReqLoginDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResCreateUserDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResLoginDTO;
+import com.tuanpham.smart_lib_be.domain.Role;
 import com.tuanpham.smart_lib_be.domain.User;
+import com.tuanpham.smart_lib_be.mapper.UserMapper;
+import com.tuanpham.smart_lib_be.service.EmailService;
+import com.tuanpham.smart_lib_be.service.RoleService;
 import com.tuanpham.smart_lib_be.service.UserService;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import com.tuanpham.smart_lib_be.util.annotation.ApiMessage;
@@ -29,23 +33,37 @@ public class AuthController {
         private final SecurityUtil securityUtil;
         private final UserService userService;
         private final PasswordEncoder passwordEncoder;
+        private final UserMapper userMapper;
+        private final EmailService emailService;
+        private final RoleService roleService;
         @Value("${tuanpp9.jwt.refresh-token-validity-in-seconds}")
         private long refreshTokenExpiration;
 
-        public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil,
-                              UserService userService, PasswordEncoder passwordEncoder) {
+        public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
+                              SecurityUtil securityUtil,
+                              UserMapper userMapper,
+                              UserService userService,
+                              PasswordEncoder passwordEncoder,
+                              RoleService roleService,
+                              EmailService emailService) {
                 this.authenticationManagerBuilder = authenticationManagerBuilder;
                 this.securityUtil = securityUtil;
                 this.userService = userService;
                 this.passwordEncoder = passwordEncoder;
+                this.userMapper = userMapper;
+                this.emailService = emailService;
+                this.roleService = roleService;
         }
 
         @PostMapping("/auth/login")
         public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody ReqLoginDTO loginDTO)
                         throws IdInvalidException {
-                boolean isUserExist = this.userService.handleExistByEmail(loginDTO.getUsername());
-                if (!isUserExist) {
+                User user = this.userService.handleGetUserByEmail(loginDTO.getUsername());
+                if (user==null) {
                         throw new IdInvalidException("username or password is invalid");
+                }
+                if(!user.isActive()){
+                        throw new IdInvalidException("Tài khoản của bạn chưa được kích hoạt");
                 }
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                                 loginDTO.getUsername(), loginDTO.getPassword());
@@ -58,9 +76,8 @@ public class AuthController {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 ResLoginDTO resLoginDTO = new ResLoginDTO();
-                User user = this.userService.handleGetUserByUsername(loginDTO.getUsername());
                 ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(user.getId(), user.getEmail(),
-                                user.getName(),
+                                user.getFullName(),
                                 user.getRole());
                 resLoginDTO.setUser(userLogin);
 
@@ -96,7 +113,7 @@ public class AuthController {
                 if (userCurrentDB != null) {
                         userLogin.setId(userCurrentDB.getId());
                         userLogin.setEmail(userCurrentDB.getEmail());
-                        userLogin.setName(userCurrentDB.getName());
+                        userLogin.setName(userCurrentDB.getFullName());
                         userLogin.setRole(userCurrentDB.getRole());
                         userGetAccount.setUser(userLogin);
                 }
@@ -125,7 +142,7 @@ public class AuthController {
                 ResLoginDTO resLoginDTO = new ResLoginDTO();
 
                 ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(user.getId(), user.getEmail(),
-                                user.getName(),
+                                user.getFullName(),
                                 user.getRole());
                 resLoginDTO.setUser(userLogin);
 
@@ -180,11 +197,14 @@ public class AuthController {
                 if (isEmailExist) {
                         throw new IdInvalidException("Email is exist");
                 }
-                String hashPassword = this.passwordEncoder.encode(user.getPassword());
-                user.setPassword(hashPassword);
+                user.setActive(false);
+                //set role reader
+                user.setRole(this.roleService.handleGetRoleById(2));
                 User newUser = this.userService.handleCreateUser(user);
+                //send email to user
+                this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo đăng ký thành công tài khoản thẻ của bạn đọc", "Trong thời gian 7 ngày, bạn đọc vui lòng đến thư viện để được cấp thẻ. Sau thời gian này đăng ký này sẽ không còn hiệu lực. Xin chân thành cảm ơn!");
                 return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(this.userService.convertToResCreateUserDTO(newUser));
+                                .body(this.userMapper.toResCreateUserDTO(newUser));
         }
 
 }

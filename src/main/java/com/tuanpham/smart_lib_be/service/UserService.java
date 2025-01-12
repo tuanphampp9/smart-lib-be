@@ -6,6 +6,7 @@ import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.domain.Role;
 import com.tuanpham.smart_lib_be.domain.User;
+import com.tuanpham.smart_lib_be.mapper.UserMapper;
 import com.tuanpham.smart_lib_be.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +22,17 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final UserMapper userMapper;
 
     public UserService(UserRepository userRepository,
+                       UserMapper userMapper,
                        RoleService roleService) {
         this.userRepository = userRepository;
         this.roleService = roleService;
+        this.userMapper = userMapper;
     }
 
     public User handleCreateUser(User user) {
-
         // check role
         if (user.getRole() != null) {
             Role role = this.roleService.handleGetRoleById(user.getRole().getId());
@@ -38,11 +41,11 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
-    public void handleDeleteUser(Long id) {
+    public void handleDeleteUser(String id) {
         this.userRepository.deleteById(id);
     }
 
-    public User handleGetUser(Long id) {
+    public User handleGetUser(String id) {
         Optional<User> userOptional = this.userRepository.findById(id);
         if (userOptional.isPresent()) {
             return userOptional.get();
@@ -53,23 +56,22 @@ public class UserService {
     public ResCreateUserDTO convertToResCreateUserDTO(User user) {
         ResCreateUserDTO resCreateUserDTO = new ResCreateUserDTO();
         resCreateUserDTO.setId(user.getId());
-        resCreateUserDTO.setName(user.getName());
+        resCreateUserDTO.setFullName(user.getFullName());
         resCreateUserDTO.setEmail(user.getEmail());
         resCreateUserDTO.setGender(user.getGender());
         resCreateUserDTO.setAddress(user.getAddress());
-        resCreateUserDTO.setAge(user.getAge());
         resCreateUserDTO.setCreatedAt(user.getCreatedAt());
-
+        resCreateUserDTO.setPortraitImg(user.getPortraitImg());
         return resCreateUserDTO;
     }
 
     public User handleUpdateUser(User newUser, User userFound) {
         userFound.setAddress(newUser.getAddress());
-        userFound.setAge(newUser.getAge());
         userFound.setEmail(newUser.getEmail());
         userFound.setGender(newUser.getGender());
-        userFound.setName(newUser.getName());
-
+        userFound.setFullName(newUser.getFullName());
+        userFound.setPortraitImg(newUser.getPortraitImg());
+        userFound.setDob(newUser.getDob());
         // check role
         if (newUser.getRole() != null) {
             Role role = this.roleService.handleGetRoleById(newUser.getRole().getId());
@@ -88,14 +90,14 @@ public class UserService {
         Page<User> pageUser = this.userRepository.findAll(spec, pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPage(pageable.getPageNumber()+1);
         meta.setPageSize(pageUser.getSize());
         meta.setTotal(pageUser.getTotalElements());// amount of elements
         meta.setPages(pageUser.getTotalPages());// amount of pages
         resultPaginationDTO.setMeta(meta);
         // remove sensitive data
         List<ResUserDTO> listUser = pageUser.getContent().stream().map(
-                u -> this.convertToResUserDTO(u))
+                u -> this.userMapper.toResUserDTO(u))
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listUser);
         return resultPaginationDTO;
@@ -111,16 +113,16 @@ public class UserService {
 
     public ResUserDTO convertToResUserDTO(User user) {
         ResUserDTO res = new ResUserDTO();
-        ResUserDTO.company company = new ResUserDTO.company();
         ResUserDTO.role role = new ResUserDTO.role();
         res.setId(user.getId());
         res.setEmail(user.getEmail());
-        res.setName(user.getName());
+        res.setFullName(user.getFullName());
         res.setGender(user.getGender());
         res.setAddress(user.getAddress());
-        res.setAge(user.getAge());
         res.setUpdatedAt(user.getUpdatedAt());
         res.setCreatedAt(user.getCreatedAt());
+        res.setPortraitImg(user.getPortraitImg());
+        res.setDob(user.getDob());
 
         if (user.getRole() != null) {
             role.setId(user.getRole().getId());
@@ -132,13 +134,12 @@ public class UserService {
 
     public ResUpdateDTO convertToResUpdateDTO(User user) {
         ResUpdateDTO res = new ResUpdateDTO();
-        ResUpdateDTO.company company = new ResUpdateDTO.company();
         res.setId(user.getId());
-        res.setName(user.getName());
+        res.setFullName(user.getFullName());
         res.setGender(user.getGender());
         res.setAddress(user.getAddress());
-        res.setAge(user.getAge());
         res.setUpdatedAt(user.getUpdatedAt());
+        res.setPortraitImg(user.getPortraitImg());
 
         return res;
     }
@@ -155,7 +156,7 @@ public class UserService {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
 
-    public boolean handleExistById(long id) {
+    public boolean handleExistById(String id) {
         return this.userRepository.existsById(id);
     }
 

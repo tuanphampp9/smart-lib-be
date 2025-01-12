@@ -1,7 +1,10 @@
 package com.tuanpham.smart_lib_be.util;
 
 import com.nimbusds.jose.util.Base64;
+import com.tuanpham.smart_lib_be.domain.Permission;
 import com.tuanpham.smart_lib_be.domain.Response.ResLoginDTO;
+import com.tuanpham.smart_lib_be.domain.Role;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -18,9 +21,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.security.SecureRandom;
 
 @Service
 public class SecurityUtil {
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final int PASSWORD_LENGTH = 7;
+    private static final SecureRandom secureRandom = new SecureRandom();
+
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
     private final JwtEncoder jwtEncoder;
 
@@ -42,22 +50,18 @@ public class SecurityUtil {
         userToken.setId(resLoginDTO.getUser().getId());
         userToken.setEmail(resLoginDTO.getUser().getEmail());
         userToken.setName(resLoginDTO.getUser().getName());
+        userToken.setRoleName(resLoginDTO.getUser().getRole().getName());
         // create token
 
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
-        // hard code permission (for testing)
-        List<String> listAuthorities = new ArrayList<String>();
-        listAuthorities.add("ROLE_USER_CREATE");
-        listAuthorities.add("ROLE_USER_CREATE");
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuedAt(now)
         .expiresAt(validity)
         .subject(email)
         .claim("user", userToken)
-        .claim("permission", listAuthorities)
         .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader,
@@ -184,5 +188,14 @@ public class SecurityUtil {
     // private static Stream<String> getAuthorities(Authentication authentication) {
     //     return authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority);
     // }
+
+    public static String generateSecurePassword() {
+        StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
+        for (int i = 0; i < PASSWORD_LENGTH; i++) {
+            int index = secureRandom.nextInt(CHARACTERS.length());
+            password.append(CHARACTERS.charAt(index));
+        }
+        return password.toString();
+    }
 
 }

@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
     User save(User user);
 
-    void deleteById(Long id);
+    void deleteById(String id);
 
     List<User> findAll();
 
-    Optional<User> findById(Long id);
+    Optional<User> findById(String id);
 
     User findByEmail(String email);
 

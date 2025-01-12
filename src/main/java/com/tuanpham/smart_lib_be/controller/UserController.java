@@ -5,6 +5,7 @@ import com.tuanpham.smart_lib_be.domain.Response.ResUpdateDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.domain.User;
+import com.tuanpham.smart_lib_be.mapper.UserMapper;
 import com.tuanpham.smart_lib_be.service.UserService;
 import com.tuanpham.smart_lib_be.util.annotation.ApiMessage;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
@@ -22,10 +23,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     @PostMapping("/users")
@@ -44,7 +47,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id)
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") String id)
             throws IdInvalidException {
         User findUser = this.userService.handleGetUser(id);
         if (findUser == null) {
@@ -55,13 +58,13 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<ResUserDTO> getUser(@PathVariable("id") Long id)
+    public ResponseEntity<ResUserDTO> getUser(@PathVariable("id") String id)
             throws IdInvalidException {
         User user = this.userService.handleGetUser(id);
         if (user == null) {
             throw new IdInvalidException("User is not exist");
         }
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUserDTO(user));
+        return ResponseEntity.status(HttpStatus.OK).body(this.userMapper.toResUserDTO(user));
     }
 
     @GetMapping("/users")
