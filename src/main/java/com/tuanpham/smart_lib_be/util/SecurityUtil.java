@@ -49,7 +49,7 @@ public class SecurityUtil {
         ResLoginDTO.UserInsideToken userToken = new ResLoginDTO.UserInsideToken();
         userToken.setId(resLoginDTO.getUser().getId());
         userToken.setEmail(resLoginDTO.getUser().getEmail());
-        userToken.setName(resLoginDTO.getUser().getName());
+        userToken.setName(resLoginDTO.getUser().getFullName());
         userToken.setRoleName(resLoginDTO.getUser().getRole().getName());
         // create token
 
@@ -72,7 +72,7 @@ public class SecurityUtil {
         ResLoginDTO.UserInsideToken userToken = new ResLoginDTO.UserInsideToken();
         userToken.setId(dto.getUser().getId());
         userToken.setEmail(dto.getUser().getEmail());
-        userToken.setName(dto.getUser().getName());
+        userToken.setName(dto.getUser().getFullName());
         // create token
 
         Instant now = Instant.now();

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "card_reads")
@@ -23,6 +24,10 @@ public class CardRead {
     @MapsId
     @JsonIgnore
     private User user;
+
+    // one cardRead has many serve
+    @OneToMany(mappedBy = "cardRead", fetch = FetchType.LAZY)
+    List<Serve> servers;
 
     @PrePersist
     private void prePersist() {
