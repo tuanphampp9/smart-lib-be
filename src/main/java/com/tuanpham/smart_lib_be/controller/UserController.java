@@ -1,12 +1,15 @@
 package com.tuanpham.smart_lib_be.controller;
 
-import com.tuanpham.smart_lib_be.domain.Response.ResCreateUserDTO;
-import com.tuanpham.smart_lib_be.domain.Response.ResUpdateDTO;
-import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
-import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
+import com.tuanpham.smart_lib_be.domain.CardRead;
+import com.tuanpham.smart_lib_be.domain.Request.ReqChangePassword;
+import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
+import com.tuanpham.smart_lib_be.service.CardReaderService;
+import com.tuanpham.smart_lib_be.service.EmailService;
+import com.tuanpham.smart_lib_be.service.RoleService;
 import com.tuanpham.smart_lib_be.service.UserService;
+import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import com.tuanpham.smart_lib_be.util.annotation.ApiMessage;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import com.turkraft.springfilter.boot.Filter;
@@ -24,11 +27,20 @@ public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final RoleService roleService;
+    private final EmailService emailService;
+    private final CardReaderService cardReaderService;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder,
+                          UserMapper userMapper, RoleService roleService,
+                          EmailService emailService,
+                          CardReaderService cardReaderService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
+        this.roleService = roleService;
+        this.emailService = emailService;
+        this.cardReaderService = cardReaderService;
     }
 
     @PostMapping("/users")
@@ -39,10 +51,22 @@ public class UserController {
         if (isExist) {
             throw new IdInvalidException("Email is already exist");
         }
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        String newPassword = SecurityUtil.generateSecurePassword();
+        user.setActive(true);
+        //set role reader
+        user.setRole(this.roleService.handleGetRoleById(2));
+        //send email to user
+        this.emailService.sendEmailCreateCardReader(user.getEmail(), "Thông báo tạo thẻ đọc thành công", "emailNewCardReader",user.getFullName(), newPassword);
+        //create password
+        String hashedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(hashedPassword);
         User newUser = this.userService.handleCreateUser(user);
 
+        //create card reader
+        CardRead cardRead = new CardRead();
+        cardRead.setUser(newUser);
+        cardRead.setCardId(this.cardReaderService.generateNextCardId());
+        this.cardReaderService.handleCreateCardReader(cardRead);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(newUser));
     }
 
@@ -72,6 +96,27 @@ public class UserController {
     public ResponseEntity<ResultPaginationDTO> getAllUser(
             @Filter Specification<User> spec, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleGetAllUser(spec, pageable));
+    }
+
+    @PutMapping("/users/change-password")
+    @ApiMessage("Change password")
+    public ResponseEntity<RestResponse<String>> changePassword(@RequestBody ReqChangePassword reqChangePassword)
+            throws IdInvalidException
+    {
+        User user = this.userService.handleGetUserByUsername(reqChangePassword.getEmail());
+        if (user == null) {
+            throw new IdInvalidException("Tài khoản không tồn tại");
+        }
+        if (!passwordEncoder.matches(reqChangePassword.getOldPassword(), user.getPassword())) {
+            throw new IdInvalidException("Mật khẩu cũ không đúng");
+        }
+        String hashedPassword = passwordEncoder.encode(reqChangePassword.getNewPassword());
+        user.setPassword(hashedPassword);
+        this.userService.handleCreateUser(user);
+        String message = "Đổi mật khẩu thành công";
+        RestResponse<String> restResponse = new RestResponse<>();
+        restResponse.setData(message);
+        return ResponseEntity.status(HttpStatus.OK).body(restResponse);
     }
 
     @PutMapping("/users")

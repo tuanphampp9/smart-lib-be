@@ -3,6 +3,7 @@ package com.tuanpham.smart_lib_be.controller;
 import com.tuanpham.smart_lib_be.domain.Request.ReqLoginDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResCreateUserDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResLoginDTO;
+import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
 import com.tuanpham.smart_lib_be.domain.Role;
 import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
@@ -76,10 +77,7 @@ public class AuthController {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 ResLoginDTO resLoginDTO = new ResLoginDTO();
-                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(user.getId(), user.getEmail(),
-                                user.getFullName(),
-                                user.getRole());
-                resLoginDTO.setUser(userLogin);
+                resLoginDTO.setUser(this.userMapper.toResUserDTO(user));
 
                 // create token
                 String accessToken = this.securityUtil.createAccessToken(authentication.getName(), resLoginDTO);
@@ -104,19 +102,15 @@ public class AuthController {
 
         @GetMapping("/auth/account")
         @ApiMessage("Get account")
-        public ResponseEntity<ResLoginDTO.UserGetAccount> getAccount() {
+        public ResponseEntity<ResUserDTO> getAccount () throws IdInvalidException {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
                                 : "";
                 User userCurrentDB = this.userService.handleGetUserByUsername(email);
-                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
-                ResLoginDTO.UserGetAccount userGetAccount = new ResLoginDTO.UserGetAccount();
-                if (userCurrentDB != null) {
-                        userLogin.setId(userCurrentDB.getId());
-                        userLogin.setEmail(userCurrentDB.getEmail());
-                        userLogin.setName(userCurrentDB.getFullName());
-                        userLogin.setRole(userCurrentDB.getRole());
-                        userGetAccount.setUser(userLogin);
+                if(userCurrentDB == null){
+                        throw new IdInvalidException("User not found");
                 }
+                ResUserDTO userGetAccount = this.userMapper.toResUserDTO(userCurrentDB);
+
                 return ResponseEntity.ok(userGetAccount);
         }
 
@@ -141,10 +135,7 @@ public class AuthController {
 
                 ResLoginDTO resLoginDTO = new ResLoginDTO();
 
-                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(user.getId(), user.getEmail(),
-                                user.getFullName(),
-                                user.getRole());
-                resLoginDTO.setUser(userLogin);
+                resLoginDTO.setUser(this.userMapper.toResUserDTO(user));
 
                 // create token
                 String accessToken = this.securityUtil.createAccessToken(email, resLoginDTO);

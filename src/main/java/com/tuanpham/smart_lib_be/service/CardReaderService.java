@@ -25,6 +25,10 @@ public class CardReaderService {
         return this.cardReaderRepository.save(cardRead);
     }
 
+    public CardRead handleGetCardReader(String id) {
+        return this.cardReaderRepository.findByCardId(id).orElse(null);
+    }
+
     public String generateNextCardId() {
         String sql = "SELECT COUNT(*) FROM card_reads";
         Number count = (Number) this.entityManager.createNativeQuery(sql).getSingleResult();
