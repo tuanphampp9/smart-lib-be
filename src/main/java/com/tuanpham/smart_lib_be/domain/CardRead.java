@@ -27,7 +27,7 @@ public class CardRead {
 
     // one cardRead has many serve
     @OneToMany(mappedBy = "cardRead", fetch = FetchType.LAZY)
-    List<Serve> servers;
+    List<Serve> serves;
 
     @PrePersist
     private void prePersist() {

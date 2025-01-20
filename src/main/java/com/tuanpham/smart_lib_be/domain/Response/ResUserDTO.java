@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.domain.Response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tuanpham.smart_lib_be.domain.CardRead;
 import com.tuanpham.smart_lib_be.util.constant.GenderEnum;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,7 @@ public class ResUserDTO {
     private String identityCardNumber;
     private String phone;
     private boolean active;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "serves"})// ignore serves
     private CardRead cardRead;
 
 

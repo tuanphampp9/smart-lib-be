@@ -1,5 +1,6 @@
 package com.tuanpham.smart_lib_be.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Serve {
     // many serves belong to one cardRead
     @ManyToOne
     @JoinColumn(name = "card_read_id", referencedColumnName = "cardId")
+    @JsonIgnore
     private CardRead cardRead;
 
     @PrePersist // action before save
