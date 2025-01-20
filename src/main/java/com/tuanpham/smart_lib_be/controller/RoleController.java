@@ -32,7 +32,7 @@ public class RoleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.roleService.handleCreateRole(role));
     }
 
-    @PutMapping("roles")
+    @PutMapping("/roles")
     public ResponseEntity<Role> update(@Valid @RequestBody Role role)
             throws IdInvalidException {
         Role roleFound = this.roleService.handleFindRoleById(role.getId());
@@ -59,7 +59,7 @@ public class RoleController {
         return ResponseEntity.ok().body(role);
     }
 
-    @DeleteMapping("roles/{id}")
+    @DeleteMapping("/roles/{id}")
     public ResponseEntity<Void> delete(@PathVariable long id)
             throws IdInvalidException {
         Role role = this.roleService.handleFindRoleById(id);
