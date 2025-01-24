@@ -1,12 +1,14 @@
 package com.tuanpham.smart_lib_be.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "languages")
@@ -19,6 +21,10 @@ public class Language {
 
     private String name;
     private String description;
+
+    // one language belong to publications
+    @OneToMany(mappedBy = "language")
+    private List<Publication> publications;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant createdAt;
