@@ -32,7 +32,7 @@ public class Publication {
 
     // many publications belong to many authors (owner)
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnoreProperties(value = { "publications" })
+    @JsonIgnoreProperties(value = { "publications", "hibernateLazyInitializer", "handler" })
     @JoinTable(name = "author_publication",
             joinColumns = @JoinColumn(name = "publication_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id"))
@@ -41,12 +41,12 @@ public class Publication {
     // many publications belong to one publisher (owner)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "publisher_id")
-    @JsonIgnoreProperties(value = { "publications" })
+    @JsonIgnoreProperties(value = { "publications", "hibernateLazyInitializer", "handler" })
     private Publisher publisher;
 
     // many publications belong to many categories (owner)
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnoreProperties(value = { "publications" })
+    @JsonIgnoreProperties(value = { "publications", "hibernateLazyInitializer", "handler" })
     @JoinTable(name = "category_publication",
             joinColumns = @JoinColumn(name = "publication_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
@@ -55,26 +55,30 @@ public class Publication {
     // one publication have one language
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "language_id")
-    @JsonIgnoreProperties(value = { "publications" })
+    @JsonIgnoreProperties(value = { "publications", "hibernateLazyInitializer", "handler" })
     private Language language;
 
     // many publications belong to one warehouse
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "warehouse_id")
-    @JsonIgnoreProperties(value = { "publications" })
+    @JsonIgnoreProperties(value = { "publications", "hibernateLazyInitializer", "handler" })
     private Warehouse warehouse;
 
     // many publications belong to many topics
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnoreProperties(value = { "publications" })
+    @JsonIgnoreProperties(value = { "publications","hibernateLazyInitializer", "handler" })
     @JoinTable(name = "topic_publication",
             joinColumns = @JoinColumn(name = "publication_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id"))
     private List<Topic> topics;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    // one publication have many import receipt details
+    @OneToMany(mappedBy = "publication", fetch = FetchType.LAZY)
+    private List<ImportReceiptDetail> importReceiptDetails;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;

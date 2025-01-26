@@ -1,8 +1,7 @@
 package com.tuanpham.smart_lib_be.domain;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,23 +11,23 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "publishers")
+@Table(name = "import_receipts")
 @Getter
 @Setter
-public class Publisher {
+public class ImportReceipt {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String name;
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    private String address;
-    private String phone;
+    private String inputSource;
+    private String deliveryPerson;
+    private String deliveryRepresentative;
+    private String note;
 
-    // one publisher have many publications
-    @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
-    private List<Publication> publications;
+    //one import receipt have many import receipt details
+    @OneToMany(mappedBy = "importReceipt", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties(value = { "importReceipt", "hibernateLazyInitializer", "handler"})
+    private List<ImportReceiptDetail> importReceiptDetails;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
