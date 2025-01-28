@@ -48,6 +48,12 @@ public class SecurityConfiguration {
                 "/api/v1/email/**",
                 "/api/files/upload/image",
                 "/api/files/upload/video",
+                "/api/v1/publications/**",
+                "/api/v1/authors/**",
+                "/api/v1/publishers/**",
+                "/api/v1/warehouses/**",
+                "/api/v1/languages/**",
+
         };
 
         http

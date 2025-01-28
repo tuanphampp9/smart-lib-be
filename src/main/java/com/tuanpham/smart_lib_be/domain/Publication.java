@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import jakarta.persistence.*;
@@ -74,6 +75,7 @@ public class Publication {
 
     // one publication have many import receipt details
     @OneToMany(mappedBy = "publication", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ImportReceiptDetail> importReceiptDetails;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
