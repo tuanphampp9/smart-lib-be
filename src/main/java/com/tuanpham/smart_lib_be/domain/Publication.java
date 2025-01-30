@@ -78,6 +78,10 @@ public class Publication {
     @JsonIgnore
     private List<ImportReceiptDetail> importReceiptDetails;
 
+    // one publication have many publication ratings
+    @OneToMany(mappedBy = "publication", fetch = FetchType.LAZY)
+    private List<PublicationRating> publicationRatings;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

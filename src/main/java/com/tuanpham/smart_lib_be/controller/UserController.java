@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.CardRead;
+import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.ReqChangePassword;
 import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.domain.User;
@@ -130,6 +131,23 @@ public class UserController {
 
         User userResult = this.userService.handleUpdateUser(newUser, findUser);
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUpdateDTO(userResult));
+    }
+
+    // user rating
+    @PostMapping("/users/ratings")
+    public ResponseEntity<RestResponse<String>> createRating(@Valid @RequestBody PubRatingReq pubRatingReq) throws IdInvalidException {
+        this.userService.handleCreateRating(pubRatingReq);
+        RestResponse<String> restResponse = new RestResponse<>();
+        restResponse.setData("Đánh giá thành công");
+        return ResponseEntity.status(HttpStatus.CREATED).body(restResponse);
+    }
+
+    // get user rating by publication id
+    @GetMapping("/users/{userId}/ratings/{publicationId}")
+    public ResponseEntity<RestResponse<Integer>> getUserRatingByPublicationId(@PathVariable("userId") String userId, @PathVariable("publicationId") Long publicationId) {
+        RestResponse<Integer> restResponse = new RestResponse<>();
+        restResponse.setData(this.userService.handleGetUserRatingByPublicationId(userId, publicationId));
+        return ResponseEntity.status(HttpStatus.OK).body(restResponse);
     }
 
 }

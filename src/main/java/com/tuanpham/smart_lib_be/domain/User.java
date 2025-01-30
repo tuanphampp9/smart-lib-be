@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.Instant;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -57,6 +58,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL,
             fetch = FetchType.LAZY, optional = true)
     private CardRead cardRead;
+
+    // one user have many ratings
+    @OneToMany(mappedBy = "user")
+    private List<PublicationRating> publicationRatings;
 
     @PrePersist // action before save
     public void handleBeforeCreate() {

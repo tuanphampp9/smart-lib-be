@@ -61,11 +61,15 @@ public class AuthController {
                         throws IdInvalidException {
                 User user = this.userService.handleGetUserByEmail(loginDTO.getUsername());
                 if (user==null) {
-                        throw new IdInvalidException("username or password is invalid");
+                        throw new IdInvalidException("Tài khoản không tồn tại");
+                }
+                if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+                        throw new IdInvalidException("Mật khẩu không đúng");
                 }
                 if(!user.isActive()){
                         throw new IdInvalidException("Tài khoản của bạn chưa được kích hoạt");
                 }
+
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                                 loginDTO.getUsername(), loginDTO.getPassword());
 

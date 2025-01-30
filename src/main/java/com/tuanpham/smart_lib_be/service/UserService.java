@@ -1,5 +1,8 @@
 package com.tuanpham.smart_lib_be.service;
 
+import com.tuanpham.smart_lib_be.domain.Publication;
+import com.tuanpham.smart_lib_be.domain.PublicationRating;
+import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResCreateUserDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResUpdateDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
@@ -7,7 +10,11 @@ import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.domain.Role;
 import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
+import com.tuanpham.smart_lib_be.repository.PublicationRatingRepository;
+import com.tuanpham.smart_lib_be.repository.PublicationRepository;
+import com.tuanpham.smart_lib_be.repository.PublisherRepository;
 import com.tuanpham.smart_lib_be.repository.UserRepository;
+import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,13 +30,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final UserMapper userMapper;
+    private final PublicationRatingRepository publicationRatingRepository;
+    private final PublicationRepository publicationRepository;
 
     public UserService(UserRepository userRepository,
-                       UserMapper userMapper,
-                       RoleService roleService) {
+                       UserMapper userMapper, PublicationRepository publicationRepository,
+                       RoleService roleService, PublicationRatingRepository publicationRatingRepository) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.userMapper = userMapper;
+        this.publicationRatingRepository = publicationRatingRepository;
+        this.publicationRepository = publicationRepository;
     }
 
     public User handleCreateUser(User user) {
@@ -166,5 +177,36 @@ public class UserService {
 
     public User handleGetUserByEmail(String email) {
         return this.userRepository.findByEmail(email);
+    }
+
+    public void handleCreateRating(PubRatingReq pubRatingReq) throws IdInvalidException {
+        Publication publication = this.publicationRepository.findById(pubRatingReq.getPublicationId()).orElse(null);
+        User user = this.userRepository.findById(pubRatingReq.getUserId()).orElse(null);
+        PublicationRating publicationRatingExist = this.publicationRatingRepository.findByUserIdAndPublicationId(
+                pubRatingReq.getUserId(), pubRatingReq.getPublicationId());
+        if (user == null) {
+            throw new IdInvalidException("Người dùng không tồn tại");
+        }
+        if (publication == null) {
+            throw new IdInvalidException("Ấn phẩm không tồn tại");
+        }
+        if(publicationRatingExist != null) {
+            publicationRatingExist.setRating(pubRatingReq.getRating());
+            this.publicationRatingRepository.save(publicationRatingExist);
+            return;
+        }
+        PublicationRating publicationRating = new PublicationRating();
+        publicationRating.setPublicationId(pubRatingReq.getPublicationId());
+        publicationRating.setUserId(pubRatingReq.getUserId());
+        publicationRating.setRating(pubRatingReq.getRating());
+        this.publicationRatingRepository.save(publicationRating);
+    }
+
+    public Integer handleGetUserRatingByPublicationId(String userId, Long publicationId) {
+        PublicationRating publicationRating = this.publicationRatingRepository.findByUserIdAndPublicationId(userId, publicationId);
+        if (publicationRating == null) {
+            return 0;
+        }
+        return publicationRating.getRating();
     }
 }

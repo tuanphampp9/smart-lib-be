@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.Publication;
+import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.service.PublicationService;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;

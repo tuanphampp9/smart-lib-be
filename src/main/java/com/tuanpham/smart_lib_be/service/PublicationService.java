@@ -1,5 +1,6 @@
 package com.tuanpham.smart_lib_be.service;
 import com.tuanpham.smart_lib_be.domain.*;
+import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.PublicationReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.PublicationMapper;
