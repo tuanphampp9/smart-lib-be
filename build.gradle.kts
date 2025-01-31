@@ -38,6 +38,9 @@ dependencies {
 	// MapStruct
 	implementation("org.mapstruct:mapstruct:1.6.2")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
+
+	// import/export excel
+	implementation("org.apache.poi:poi-ooxml:5.2.4")
 }
 
 tasks.withType<Test> {

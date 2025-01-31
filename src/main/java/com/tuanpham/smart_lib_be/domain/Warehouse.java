@@ -24,9 +24,9 @@ public class Warehouse {
     private String name;
     @Column(columnDefinition = "TEXT")
     private String description;
-
     // one warehouse have many publications
     @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Publication> publications;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

@@ -4,6 +4,7 @@ import com.tuanpham.smart_lib_be.domain.Author;
 import com.tuanpham.smart_lib_be.domain.Category;
 import com.tuanpham.smart_lib_be.domain.Request.AuthorReq;
 import com.tuanpham.smart_lib_be.domain.Request.CategoryReq;
+import com.tuanpham.smart_lib_be.domain.Response.AuthorRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.AuthorMapper;
 import com.tuanpham.smart_lib_be.mapper.CategoryMapper;
@@ -31,6 +32,12 @@ public class AuthorService {
     public Author handleCreateAuthor(Author author) {
         return this.authorRepository.save(author);
     }
+    public AuthorRes handleGetAuthorById(String id) {
+        int count = this.countAuthorPublication(id);
+        AuthorRes authorRes = this.authorMapper.toAuthorRes(this.authorRepository.findById(id).orElse(null));
+        authorRes.setNumberOfPublications(count);
+        return authorRes;
+    }
     public Author handleFindAuthorById(String id) {
         return this.authorRepository.findById(id).orElse(null);
     }
@@ -55,8 +62,12 @@ public class AuthorService {
         meta.setPages(pageAuthors.getTotalPages());// amount of pages
         resultPaginationDTO.setMeta(meta);
         // remove sensitive data
-        List<Author> listAuthors = pageAuthors.getContent().stream().map(
-                        c -> c)
+        List<AuthorRes> listAuthors = pageAuthors.getContent().stream().map(
+                        c -> {
+                            AuthorRes authorRes = this.authorMapper.toAuthorRes(c);
+                            authorRes.setNumberOfPublications(this.countAuthorPublication(c.getId()));
+                            return authorRes;
+                        })
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listAuthors);
         return resultPaginationDTO;
@@ -64,5 +75,9 @@ public class AuthorService {
 
     public void handleDeleteAuthor(String id) {
         this.authorRepository.deleteById(id);
+    }
+
+    public int countAuthorPublication(String authorId) {
+        return this.authorRepository.countAuthorPublication(authorId);
     }
 }

@@ -1,12 +1,10 @@
 package com.tuanpham.smart_lib_be.domain;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -22,7 +20,6 @@ public class Topic {
     private String name;
     @Column(columnDefinition = "TEXT")
     private String description;
-
     // many topics belong to many publications
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "topics")
     @JsonIgnore

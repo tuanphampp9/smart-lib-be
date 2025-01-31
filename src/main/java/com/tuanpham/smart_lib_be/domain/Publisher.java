@@ -25,9 +25,9 @@ public class Publisher {
     private String description;
     private String address;
     private String phone;
-
     // one publisher have many publications
     @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Publication> publications;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

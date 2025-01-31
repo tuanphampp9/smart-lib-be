@@ -4,6 +4,7 @@ package com.tuanpham.smart_lib_be.controller;
 import com.tuanpham.smart_lib_be.domain.CardRead;
 import com.tuanpham.smart_lib_be.domain.Category;
 import com.tuanpham.smart_lib_be.domain.Request.CategoryReq;
+import com.tuanpham.smart_lib_be.domain.Response.CategoryRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.domain.Role;
 import com.tuanpham.smart_lib_be.service.CategoryService;
@@ -15,6 +16,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -42,13 +46,13 @@ public class CategoryController {
     }
 
     @GetMapping("/categories/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable("id") String id)
+    public ResponseEntity<CategoryRes> getCategoryById(@PathVariable("id") String id)
             throws IdInvalidException {
-        Category category = this.categoryService.handleFindCategoryById(id);
-        if (category == null) {
+        CategoryRes categoryRes = this.categoryService.handleGetCategoryById(id);
+        if (categoryRes == null) {
             throw new IdInvalidException("Thể loại không tồn tại");
         }
-        return ResponseEntity.ok().body(category);
+        return ResponseEntity.ok().body(categoryRes);
     }
 
     @GetMapping("/categories")
@@ -67,5 +71,12 @@ public class CategoryController {
         }
         this.categoryService.handleDeleteCategory(id);
         return ResponseEntity.ok().body("Xóa thể loại thành công");
+    }
+
+    // import data from excel
+    @PostMapping("/categories/import-excel")
+    public ResponseEntity<String> importDataFromExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        this.categoryService.saveAllFromExcel(file);
+        return ResponseEntity.ok().body("Import thành công");
     }
 }

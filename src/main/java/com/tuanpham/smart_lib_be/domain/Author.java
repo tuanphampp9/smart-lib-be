@@ -29,6 +29,7 @@ public class Author {
     private String dod;
     // many authors belong to many publications (inverse)
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "authors")
+    @JsonIgnore
     private List<Publication> publications;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

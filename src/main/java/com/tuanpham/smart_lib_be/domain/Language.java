@@ -21,7 +21,6 @@ public class Language {
 
     private String name;
     private String description;
-
     // one language belong to publications
     @OneToMany(mappedBy = "language")
     private List<Publication> publications;

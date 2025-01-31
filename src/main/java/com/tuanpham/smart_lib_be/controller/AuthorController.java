@@ -1,12 +1,10 @@
 package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.Author;
-import com.tuanpham.smart_lib_be.domain.Category;
 import com.tuanpham.smart_lib_be.domain.Request.AuthorReq;
-import com.tuanpham.smart_lib_be.domain.Request.CategoryReq;
+import com.tuanpham.smart_lib_be.domain.Response.AuthorRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.service.AuthorService;
-import com.tuanpham.smart_lib_be.service.CategoryService;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
@@ -38,13 +36,13 @@ public class AuthorController {
     }
 
     @GetMapping("/authors/{id}")
-    public ResponseEntity<Author> getCategoryById(@PathVariable("id") String id)
+    public ResponseEntity<AuthorRes> getCategoryById(@PathVariable("id") String id)
             throws IdInvalidException {
-        Author author = this.authorService.handleFindAuthorById(id);
-        if (author == null) {
+        AuthorRes authorRes = this.authorService.handleGetAuthorById(id);
+        if (authorRes == null) {
             throw new IdInvalidException("Tác giả không tồn tại");
         }
-        return ResponseEntity.ok().body(author);
+        return ResponseEntity.ok().body(authorRes);
     }
 
     @GetMapping("/authors")

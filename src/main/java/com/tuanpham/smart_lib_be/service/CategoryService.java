@@ -2,17 +2,28 @@ package com.tuanpham.smart_lib_be.service;
 
 import com.tuanpham.smart_lib_be.domain.CardRead;
 import com.tuanpham.smart_lib_be.domain.Category;
+import com.tuanpham.smart_lib_be.domain.Publisher;
 import com.tuanpham.smart_lib_be.domain.Request.CategoryReq;
+import com.tuanpham.smart_lib_be.domain.Response.CategoryRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.CategoryMapper;
 import com.tuanpham.smart_lib_be.mapper.TopicMapper;
 import com.tuanpham.smart_lib_be.repository.CategoryRepository;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +46,13 @@ public class CategoryService {
     }
     public Category handleFindCategoryById(String id) {
         return this.categoryRepository.findById(id).orElse(null);
+    }
+
+    public CategoryRes handleGetCategoryById(String id) {
+       CategoryRes categoryRes = this.categoryMapper.toCategoryRes(this.categoryRepository.findById(id).orElse(null));
+       int count = this.categoryRepository.countCategoryPublication(id);
+       categoryRes.setNumberOfPublications(count);
+       return categoryRes;
     }
 
     public Category handleUpdateCategory(CategoryReq categoryReq, String id) throws IdInvalidException {
@@ -60,8 +78,13 @@ public class CategoryService {
         meta.setPages(pageCategories.getTotalPages());// amount of pages
         resultPaginationDTO.setMeta(meta);
         // remove sensitive data
-        List<Category> listCategories = pageCategories.getContent().stream().map(
-                        c -> c)
+        List<CategoryRes> listCategories = pageCategories.getContent().stream().map(
+                        c -> {
+                            CategoryRes categoryRes = this.categoryMapper.toCategoryRes(c);
+                            int count = this.categoryRepository.countCategoryPublication(c.getId());
+                            categoryRes.setNumberOfPublications(count);
+                            return categoryRes;
+                        })
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listCategories);
         return resultPaginationDTO;
@@ -69,5 +92,53 @@ public class CategoryService {
 
     public void handleDeleteCategory(String id) {
         this.categoryRepository.deleteById(id);
+    }
+
+    public List<Category> getCategoriesFromExcel(InputStream inputStream) {
+        List<Category> listCategories = new ArrayList<>();
+        try {
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+            XSSFSheet sheet = workbook.getSheet("categories");
+            int rowIndex = 0;
+            for(Row row : sheet) {
+                // skip header
+                if(rowIndex == 0) {
+                    rowIndex++;
+                    continue;
+                }
+                Iterator<Cell> cellIterator = row.cellIterator();
+                int cellIndex = 0;
+                Category category = new Category();
+                while(cellIterator.hasNext()) {
+                    Cell cell = cellIterator.next();
+                    switch(cellIndex) {
+                        case 0:
+                            category.setName(cell.getStringCellValue());
+                            break;
+                        case 1:
+                            category.setDescription(cell.getStringCellValue());
+                            break;
+                        default:
+                            break;
+                    }
+                    cellIndex++;
+                }
+                listCategories.add(category);
+            }
+        }catch (Exception e) {
+            e.getStackTrace();
+        }
+        return listCategories;
+    }
+
+    public void saveAllFromExcel(MultipartFile file) {
+        if(ExcelService.isValidateExcelFile(file)) {
+            try {
+                List<Category> listCategories = getCategoriesFromExcel(file.getInputStream());
+                this.categoryRepository.saveAll(listCategories);
+            }catch (IOException e) {
+                throw new IllegalArgumentException("Lỗi khi đọc file excel");
+            }
+        }
     }
 }

@@ -22,7 +22,6 @@ public class Category {
     private String name;
     @Column(columnDefinition = "TEXT")
     private String description;
-
     // many categories belong to many publications (inverse)
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categories")
     @JsonIgnore

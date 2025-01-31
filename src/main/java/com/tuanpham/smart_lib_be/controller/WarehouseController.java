@@ -2,6 +2,7 @@ package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.Request.WarehouseReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
+import com.tuanpham.smart_lib_be.domain.Response.WarehouseRes;
 import com.tuanpham.smart_lib_be.domain.Warehouse;
 import com.tuanpham.smart_lib_be.service.WarehouseService;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
@@ -12,6 +13,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -39,13 +43,13 @@ public class WarehouseController {
     }
 
     @GetMapping("/warehouses/{id}")
-    public ResponseEntity<Warehouse> getWarehouseById(@PathVariable("id") String id)
+    public ResponseEntity<WarehouseRes> getWarehouseById(@PathVariable("id") String id)
             throws IdInvalidException {
-        Warehouse warehouse = this.warehouseService.handleFindWarehouseById(id);
-        if (warehouse == null) {
+        WarehouseRes warehouseRes = this.warehouseService.handleGetWarehouseResById(id);
+        if (warehouseRes == null) {
             throw new IdInvalidException("Kho không tồn tại");
         }
-        return ResponseEntity.ok().body(warehouse);
+        return ResponseEntity.ok().body(warehouseRes);
     }
 
     @GetMapping("/warehouses")
@@ -64,5 +68,12 @@ public class WarehouseController {
         }
         this.warehouseService.handleDeleteWarehouse(id);
         return ResponseEntity.ok().body("Xóa kho thành công");
+    }
+
+    // import data from excel
+    @PostMapping("/warehouses/import-excel")
+    public ResponseEntity<String> importDataFromExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        this.warehouseService.saveAllFromExcel(file);
+        return ResponseEntity.ok().body("Import thành công");
     }
 }
