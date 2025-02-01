@@ -82,6 +82,11 @@ public class Publication {
     @OneToMany(mappedBy = "publication", fetch = FetchType.LAZY)
     private List<PublicationRating> publicationRatings;
 
+    // one publication have many cart users
+    @OneToMany(mappedBy = "publication", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<CartUser> cartUsers;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import com.tuanpham.smart_lib_be.util.constant.GenderEnum;
 import jakarta.persistence.*;
@@ -62,6 +63,10 @@ public class User {
     // one user have many ratings
     @OneToMany(mappedBy = "user")
     private List<PublicationRating> publicationRatings;
+
+    // one user have many cart users
+    @OneToMany(mappedBy = "user")
+    private List<CartUser> cartUsers;
 
     @PrePersist // action before save
     public void handleBeforeCreate() {

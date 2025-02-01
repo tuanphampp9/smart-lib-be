@@ -1,19 +1,11 @@
 package com.tuanpham.smart_lib_be.service;
 
-import com.tuanpham.smart_lib_be.domain.Publication;
-import com.tuanpham.smart_lib_be.domain.PublicationRating;
+import com.tuanpham.smart_lib_be.domain.*;
+import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
-import com.tuanpham.smart_lib_be.domain.Response.ResCreateUserDTO;
-import com.tuanpham.smart_lib_be.domain.Response.ResUpdateDTO;
-import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
-import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
-import com.tuanpham.smart_lib_be.domain.Role;
-import com.tuanpham.smart_lib_be.domain.User;
+import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
-import com.tuanpham.smart_lib_be.repository.PublicationRatingRepository;
-import com.tuanpham.smart_lib_be.repository.PublicationRepository;
-import com.tuanpham.smart_lib_be.repository.PublisherRepository;
-import com.tuanpham.smart_lib_be.repository.UserRepository;
+import com.tuanpham.smart_lib_be.repository.*;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,15 +24,18 @@ public class UserService {
     private final UserMapper userMapper;
     private final PublicationRatingRepository publicationRatingRepository;
     private final PublicationRepository publicationRepository;
+    private final CartUserRepository cartUserRepository;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper, PublicationRepository publicationRepository,
-                       RoleService roleService, PublicationRatingRepository publicationRatingRepository) {
+                       RoleService roleService, PublicationRatingRepository publicationRatingRepository,
+                       CartUserRepository cartUserRepository) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.userMapper = userMapper;
         this.publicationRatingRepository = publicationRatingRepository;
         this.publicationRepository = publicationRepository;
+        this.cartUserRepository = cartUserRepository;
     }
 
     public User handleCreateUser(User user) {
@@ -208,5 +203,49 @@ public class UserService {
             return 0;
         }
         return publicationRating.getRating();
+    }
+
+    public CartUser handleAddPublicationToCart(CartUserReq cartUserReq) throws IdInvalidException {
+        CartUser cartUserExist = this.cartUserRepository.findByUserIdAndPublicationId(cartUserReq.getUserId(), cartUserReq.getPublicationId());
+        if (cartUserExist != null) {
+            int quantity = cartUserExist.getQuantity() + cartUserReq.getQuantity();
+            cartUserExist.setQuantity(quantity);
+            return this.cartUserRepository.save(cartUserExist);
+        }
+        Publication publicationExist = this.publicationRepository.findById(cartUserReq.getPublicationId()).orElse(null);
+        if (publicationExist == null) {
+            throw new IdInvalidException("Không tìm thấy ấn phẩm");
+        }
+        User userExist = this.userRepository.findById(cartUserReq.getUserId()).orElse(null);
+        if (userExist == null) {
+            throw new IdInvalidException("Không tìm thấy người dùng");
+        }
+        CartUser cartUser = new CartUser();
+        cartUser.setPublicationId(cartUserReq.getPublicationId());
+        cartUser.setUserId(cartUserReq.getUserId());
+        cartUser.setQuantity(cartUserReq.getQuantity());
+        cartUser.setPublication(publicationExist);
+        cartUser.setUser(userExist);
+        return this.cartUserRepository.save(cartUser);
+    }
+    public void handleRemovePublicationFromCart(String id) throws IdInvalidException {
+        CartUser cartUserExist = this.cartUserRepository.findById(id).orElse(null);
+        if (cartUserExist == null) {
+            throw new IdInvalidException("Không tìm thấy giỏ hàng");
+        }
+        this.cartUserRepository.deleteById(id);
+    }
+
+    public void handleMinusPublicationFromCart(String id) throws IdInvalidException {
+        CartUser cartUserExist = this.cartUserRepository.findById(id).orElse(null);
+        if (cartUserExist == null) {
+            throw new IdInvalidException("Không tìm thấy giỏ hàng");
+        }
+        int quantity = cartUserExist.getQuantity() - 1;
+        if (quantity == 0) {
+            throw new IdInvalidException("Số lượng không thể nhỏ hơn 1");
+        }
+        cartUserExist.setQuantity(quantity);
+        this.cartUserRepository.save(cartUserExist);
     }
 }

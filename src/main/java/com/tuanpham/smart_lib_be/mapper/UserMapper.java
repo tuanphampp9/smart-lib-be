@@ -1,4 +1,6 @@
 package com.tuanpham.smart_lib_be.mapper;
+import com.tuanpham.smart_lib_be.domain.CartUser;
+import com.tuanpham.smart_lib_be.domain.Response.CartUserRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResCreateUserDTO;
 import com.tuanpham.smart_lib_be.domain.Response.ResUserDTO;
 import com.tuanpham.smart_lib_be.domain.User;
@@ -14,4 +16,6 @@ public interface UserMapper {
     ResCreateUserDTO toResCreateUserDTO(User user);
     @Mapping(target = "cardRead", expression = "java(user.getCardRead() != null ? user.getCardRead() : null)")
     ResUserDTO toResUserDTO(User user);
+
+    CartUserRes toCartUserRes(CartUser cartUser);
 }

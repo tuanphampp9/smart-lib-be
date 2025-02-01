@@ -1,6 +1,8 @@
 package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.CardRead;
+import com.tuanpham.smart_lib_be.domain.CartUser;
+import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.ReqChangePassword;
 import com.tuanpham.smart_lib_be.domain.Response.*;
@@ -21,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -147,6 +151,34 @@ public class UserController {
     public ResponseEntity<RestResponse<Integer>> getUserRatingByPublicationId(@PathVariable("userId") String userId, @PathVariable("publicationId") Long publicationId) {
         RestResponse<Integer> restResponse = new RestResponse<>();
         restResponse.setData(this.userService.handleGetUserRatingByPublicationId(userId, publicationId));
+        return ResponseEntity.status(HttpStatus.OK).body(restResponse);
+    }
+
+    //create cart user
+    @PostMapping("/users/cart")
+    public ResponseEntity<RestResponse<CartUserRes>> addPubToCart(@Valid @RequestBody CartUserReq cartUserReq) throws IdInvalidException {
+        CartUser cartUser=this.userService.handleAddPublicationToCart(cartUserReq);
+        CartUserRes cartUserRes = this.userMapper.toCartUserRes(cartUser);
+        RestResponse<CartUserRes> restResponse = new RestResponse<>();
+        restResponse.setData(cartUserRes);
+        return ResponseEntity.status(HttpStatus.CREATED).body(restResponse);
+    }
+
+    //remove cart user
+    @DeleteMapping("/users/cart/{id}")
+    public ResponseEntity<RestResponse<String>> removePubFromCart(@PathVariable("id") String id) throws IdInvalidException {
+        this.userService.handleRemovePublicationFromCart(id);
+        RestResponse<String> restResponse = new RestResponse<>();
+        restResponse.setData("Xóa khỏi giỏ hàng thành công");
+        return ResponseEntity.status(HttpStatus.OK).body(restResponse);
+    }
+
+    // minus cart user
+    @PutMapping("/users/cart/minus/{id}")
+    public ResponseEntity<RestResponse<String>> minusPubFromCart(@PathVariable("id") String id) throws IdInvalidException {
+        this.userService.handleMinusPublicationFromCart(id);
+        RestResponse<String> restResponse = new RestResponse<>();
+        restResponse.setData("Giảm số lượng thành công");
         return ResponseEntity.status(HttpStatus.OK).body(restResponse);
     }
 

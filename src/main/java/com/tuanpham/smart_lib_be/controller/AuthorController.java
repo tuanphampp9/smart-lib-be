@@ -13,6 +13,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -61,5 +64,12 @@ public class AuthorController {
         }
         this.authorService.handleDeleteAuthor(id);
         return ResponseEntity.ok().body("Xóa tác giả thành công");
+    }
+
+    // import data from excel
+    @PostMapping("/authors/import-excel")
+    public ResponseEntity<String> importDataFromExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        this.authorService.saveAllFromExcel(file);
+        return ResponseEntity.ok().body("Import thành công");
     }
 }
