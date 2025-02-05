@@ -2,6 +2,7 @@ package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.Publication;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
+import com.tuanpham.smart_lib_be.domain.Response.PublicationRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.service.PublicationService;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
@@ -39,13 +40,13 @@ public class PublicationController {
     }
 
     @GetMapping("/publications/{id}")
-    public ResponseEntity<Publication> getPublicationById(@PathVariable("id") Long id)
+    public ResponseEntity<PublicationRes> getPublicationById(@PathVariable("id") Long id)
             throws IdInvalidException {
-        Publication publication = this.publicationService.handleFindPublicationById(id);
-        if (publication == null) {
+        PublicationRes publicationRes = this.publicationService.handleFindPublicationResById(id);
+        if (publicationRes == null) {
             throw new IdInvalidException("Ấn phẩm không tồn tại");
         }
-        return ResponseEntity.ok().body(publication);
+        return ResponseEntity.ok().body(publicationRes);
     }
 
     @GetMapping("/publications")

@@ -2,6 +2,7 @@ package com.tuanpham.smart_lib_be.service;
 import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.PublicationReq;
+import com.tuanpham.smart_lib_be.domain.Response.PublicationRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.PublicationMapper;
 import com.tuanpham.smart_lib_be.repository.*;
@@ -24,11 +25,13 @@ public class PublicationService {
     private final PublisherRepository publisherRepository;
     private final LanguageRepository languageRepository;
     private final WarehouseRepository warehouseRepository;
+    private final CartUserRepository cartUserRepository;
 
     public PublicationService(PublicationRepository publicationRepository, PublicationMapper publicationMapper,
                               AuthorRepository authorRepository, CategoryRepository categoryRepository,
                               TopicRepository topicRepository, PublisherRepository publisherRepository,
-                              LanguageRepository languageRepository, WarehouseRepository warehouseRepository) {
+                              LanguageRepository languageRepository, WarehouseRepository warehouseRepository,
+                              CartUserRepository cartUserRepository) {
         this.publicationRepository = publicationRepository;
         this.publicationMapper = publicationMapper;
         this.authorRepository = authorRepository;
@@ -37,6 +40,7 @@ public class PublicationService {
         this.publisherRepository = publisherRepository;
         this.languageRepository = languageRepository;
         this.warehouseRepository = warehouseRepository;
+        this.cartUserRepository = cartUserRepository;
     }
 
     public boolean handlePublicationExist(String name) {
@@ -158,6 +162,17 @@ public class PublicationService {
         return this.publicationRepository.findById(id).orElse(null);
     }
 
+    public PublicationRes handleFindPublicationResById(Long id) {
+        Publication publication = this.publicationRepository.findById(id).orElse(null);
+        if (publication == null) {
+            return null;
+        }
+        Long totalQuantityPub = this.cartUserRepository.sumQuantityByPublicationId(publication.getId());
+        PublicationRes publicationRes = this.publicationMapper.toPublicationRes(publication);
+        publicationRes.setTotalQuantity(totalQuantityPub);
+        return publicationRes;
+    }
+
     public ResultPaginationDTO handleGetAlLPublication(Specification<Publication> spec,
                                                     Pageable pageable) {
         Page<Publication> pagePublications = this.publicationRepository.findAll(spec, pageable);
@@ -169,8 +184,14 @@ public class PublicationService {
         meta.setPages(pagePublications.getTotalPages());// amount of pages
         resultPaginationDTO.setMeta(meta);
         // remove sensitive data
-        List<Publication> listPublications = pagePublications.getContent().stream().map(
-                        c -> c)
+        List<PublicationRes> listPublications = pagePublications.getContent().stream().map(
+                        p ->{
+                            Long totalQuantityPub = this.cartUserRepository.sumQuantityByPublicationId(p.getId());
+                            PublicationRes publicationRes = this.publicationMapper.toPublicationRes(p);
+                            publicationRes.setTotalQuantity(totalQuantityPub);
+                            return publicationRes;
+
+                        })
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listPublications);
         return resultPaginationDTO;

@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface RegistrationUniqueRepository extends JpaRepository<RegistrationUnique, Long>, JpaSpecificationExecutor<RegistrationUnique> {
     void deleteByImportReceiptDetail(ImportReceiptDetail importReceiptDetail);
+    RegistrationUnique findByRegistrationId(String registrationId);
 }

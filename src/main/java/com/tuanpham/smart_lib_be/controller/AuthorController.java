@@ -39,7 +39,7 @@ public class AuthorController {
     }
 
     @GetMapping("/authors/{id}")
-    public ResponseEntity<AuthorRes> getCategoryById(@PathVariable("id") String id)
+    public ResponseEntity<AuthorRes> getAuthorById(@PathVariable("id") String id)
             throws IdInvalidException {
         AuthorRes authorRes = this.authorService.handleGetAuthorById(id);
         if (authorRes == null) {
@@ -49,14 +49,14 @@ public class AuthorController {
     }
 
     @GetMapping("/authors")
-    public ResponseEntity<ResultPaginationDTO> getAllCategories(
+    public ResponseEntity<ResultPaginationDTO> getAllAuthors(
             @Filter Specification<Author> spec, Pageable pageable
     ) {
         return ResponseEntity.ok().body(this.authorService.handleGetAllCategories(spec, pageable));
     }
 
     @DeleteMapping("/authors/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable("id") String id)
+    public ResponseEntity<String> deleteAuthor(@PathVariable("id") String id)
             throws IdInvalidException {
         Author author = this.authorService.handleFindAuthorById(id);
         if (author == null) {

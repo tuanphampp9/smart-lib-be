@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "registration_unique")
@@ -31,6 +32,11 @@ public class RegistrationUnique {
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ImportReceiptDetail importReceiptDetail;
+
+    // one registration unique belongs to many borrow slip details
+    @OneToMany(mappedBy = "registrationUnique", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<BorrowSlipDetail> borrowSlipDetails;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;

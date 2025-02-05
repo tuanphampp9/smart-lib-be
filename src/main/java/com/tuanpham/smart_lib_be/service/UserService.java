@@ -207,18 +207,25 @@ public class UserService {
 
     public CartUser handleAddPublicationToCart(CartUserReq cartUserReq) throws IdInvalidException {
         CartUser cartUserExist = this.cartUserRepository.findByUserIdAndPublicationId(cartUserReq.getUserId(), cartUserReq.getPublicationId());
-        if (cartUserExist != null) {
-            int quantity = cartUserExist.getQuantity() + cartUserReq.getQuantity();
-            cartUserExist.setQuantity(quantity);
-            return this.cartUserRepository.save(cartUserExist);
-        }
         Publication publicationExist = this.publicationRepository.findById(cartUserReq.getPublicationId()).orElse(null);
+        Long totalQuantityPubCanBorrow = this.cartUserRepository.countQuantityCanBorrow(cartUserReq.getPublicationId());
         if (publicationExist == null) {
             throw new IdInvalidException("Không tìm thấy ấn phẩm");
         }
         User userExist = this.userRepository.findById(cartUserReq.getUserId()).orElse(null);
         if (userExist == null) {
             throw new IdInvalidException("Không tìm thấy người dùng");
+        }
+        if (cartUserExist != null) {
+            int quantity = cartUserExist.getQuantity() + cartUserReq.getQuantity();
+            if(totalQuantityPubCanBorrow < quantity) {
+                throw new IdInvalidException("Số lượng trong kho không đủ");
+            }
+            cartUserExist.setQuantity(quantity);
+            return this.cartUserRepository.save(cartUserExist);
+        }
+        if(totalQuantityPubCanBorrow < cartUserReq.getQuantity()) {
+            throw new IdInvalidException("Số lượng trong kho không đủ");
         }
         CartUser cartUser = new CartUser();
         cartUser.setPublicationId(cartUserReq.getPublicationId());

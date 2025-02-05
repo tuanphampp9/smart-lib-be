@@ -1,5 +1,6 @@
 package com.tuanpham.smart_lib_be.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,11 @@ public class CardRead {
     // one cardRead has many serve
     @OneToMany(mappedBy = "cardRead", fetch = FetchType.LAZY)
     List<Serve> serves;
+
+    // one cardRead has many borrowSlip
+    @OneToMany(mappedBy = "cardRead", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = { "cardRead","hibernateLazyInitializer", "handler" })
+    List<BorrowSlip> borrowSlips;
 
     @PrePersist
     private void prePersist() {
