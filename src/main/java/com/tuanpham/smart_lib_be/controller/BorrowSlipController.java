@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.*;
+import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipAdminReq;
 import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipClientReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.service.BorrowSlipService;
@@ -38,6 +39,25 @@ public class BorrowSlipController {
             @Filter Specification<BorrowSlip> spec, Pageable pageable
     ) {
         return ResponseEntity.ok().body(this.borrowSlipService.handleGetAllBorrowSlips(spec, pageable));
+    }
+
+    // accept borrow slip
+    @PutMapping("/borrow-slips/{borrowSlipId}/accept")
+    public ResponseEntity<BorrowSlip> acceptBorrowSlip(@PathVariable String borrowSlipId) throws IdInvalidException {
+        return ResponseEntity.ok().body(this.borrowSlipService.handleAcceptBorrowSlip(borrowSlipId));
+    }
+
+    //delete borrow slip
+    @DeleteMapping("/borrow-slips/{borrowSlipId}")
+    public ResponseEntity<String> deleteBorrowSlip(@PathVariable String borrowSlipId) throws IdInvalidException {
+        this.borrowSlipService.handleDeleteBorrowSlip(borrowSlipId);
+        return ResponseEntity.ok().body("Delete borrow slip successfully");
+    }
+
+    //create borrow slip by admin
+    @PostMapping("/admin/borrow-slips")
+    public ResponseEntity<BorrowSlip> createBorrowSlipByAdmin(@Valid @RequestBody BorrowSlipAdminReq borrowSlip) throws IdInvalidException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.borrowSlipService.handleCreateBorrowSlipByAdmin(borrowSlip));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.service;
 
 import com.tuanpham.smart_lib_be.domain.*;
+import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipAdminReq;
 import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipClientReq;
 import com.tuanpham.smart_lib_be.domain.Response.AuthorRes;
 import com.tuanpham.smart_lib_be.domain.Response.BorrowSlipRes;
@@ -11,12 +12,14 @@ import com.tuanpham.smart_lib_be.repository.BorrowSlipRepository;
 import com.tuanpham.smart_lib_be.repository.CartUserRepository;
 import com.tuanpham.smart_lib_be.repository.RegistrationUniqueRepository;
 import com.tuanpham.smart_lib_be.util.constant.PublicationStatusEnum;
+import com.tuanpham.smart_lib_be.util.constant.StatusBorrowSlipEnum;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,5 +122,63 @@ public class BorrowSlipService {
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listBorrowSlips);
         return resultPaginationDTO;
-    } 
+    }
+
+    public BorrowSlip handleAcceptBorrowSlip(String borrowSlipId) throws IdInvalidException {
+        BorrowSlip borrowSlip = this.borrowSlipRepository.findById(borrowSlipId).orElse(null);
+        if (borrowSlip == null) {
+            throw new IdInvalidException("Phiếu mượn không tồn tại");
+        }
+        borrowSlip.setStatus(StatusBorrowSlipEnum.BORRWING);
+        borrowSlip.setBorrowDate(Instant.now());
+        borrowSlip.setReturnDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
+        this.borrowSlipRepository.save(borrowSlip);
+        return borrowSlip;
+    }
+
+    public void handleDeleteBorrowSlip(String borrowSlipId) throws IdInvalidException {
+        BorrowSlip borrowSlip = this.borrowSlipRepository.findById(borrowSlipId).orElse(null);
+        if (borrowSlip == null) {
+            throw new IdInvalidException("Phiếu mượn không tồn tại");
+        }
+        List<BorrowSlipDetail> borrowSlipDetails = borrowSlip.getBorrowSlipDetails();
+        for (BorrowSlipDetail borrowSlipDetail : borrowSlipDetails) {
+            RegistrationUnique registrationUnique = borrowSlipDetail.getRegistrationUnique();
+            registrationUnique.setStatus(PublicationStatusEnum.AVAILABLE);
+            this.registrationUniqueRepository.save(registrationUnique);
+            this.borrowSlipDetailRepository.delete(borrowSlipDetail);
+        }
+        this.borrowSlipRepository.delete(borrowSlip);
+    }
+
+    public BorrowSlip handleCreateBorrowSlipByAdmin(BorrowSlipAdminReq borrowSlipAdminReq) throws IdInvalidException {
+        CardRead cardRead = this.cardReaderService.handleGetCardReader(borrowSlipAdminReq.getCardId());
+        if (cardRead == null) {
+            throw new IdInvalidException("Thẻ đọc không tồn tại");
+        }
+        //create borrow slip
+        BorrowSlip borrowSlip = new BorrowSlip();
+        borrowSlip.setCardRead(cardRead);
+        borrowSlip.setBorrowDate(Instant.now());
+        borrowSlip.setReturnDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
+        this.borrowSlipRepository.save(borrowSlip);
+        List<BorrowSlipDetail> borrowSlipDetails = new ArrayList<>();
+        for (String registrationId : borrowSlipAdminReq.getRegistrationIds()) {
+            RegistrationUnique registrationUnique = this.registrationUniqueRepository.findByRegistrationId(registrationId);
+            if (registrationUnique == null) {
+                continue;
+            }
+            // update status registration_unique
+            registrationUnique.setStatus(PublicationStatusEnum.BORROWED);
+            this.registrationUniqueRepository.save(registrationUnique);
+            // create borrow slip detail
+            BorrowSlipDetail borrowSlipDetail = new BorrowSlipDetail();
+            borrowSlipDetail.setBorrowSlip(borrowSlip);
+            borrowSlipDetail.setRegistrationUnique(registrationUnique);
+            this.borrowSlipDetailRepository.save(borrowSlipDetail);
+            borrowSlipDetails.add(borrowSlipDetail);
+        }
+        borrowSlip.setBorrowSlipDetails(borrowSlipDetails);
+        return borrowSlip;
+    }
 }
