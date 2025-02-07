@@ -3,6 +3,7 @@ package com.tuanpham.smart_lib_be.service;
 import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipAdminReq;
 import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipClientReq;
+import com.tuanpham.smart_lib_be.domain.Request.ReturnBorrowSlipReq;
 import com.tuanpham.smart_lib_be.domain.Response.AuthorRes;
 import com.tuanpham.smart_lib_be.domain.Response.BorrowSlipRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
@@ -129,9 +130,9 @@ public class BorrowSlipService {
         if (borrowSlip == null) {
             throw new IdInvalidException("Phiếu mượn không tồn tại");
         }
-        borrowSlip.setStatus(StatusBorrowSlipEnum.BORRWING);
+        borrowSlip.setStatus(StatusBorrowSlipEnum.BORROWING);
         borrowSlip.setBorrowDate(Instant.now());
-        borrowSlip.setReturnDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
+        borrowSlip.setDueDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
         this.borrowSlipRepository.save(borrowSlip);
         return borrowSlip;
     }
@@ -160,7 +161,7 @@ public class BorrowSlipService {
         BorrowSlip borrowSlip = new BorrowSlip();
         borrowSlip.setCardRead(cardRead);
         borrowSlip.setBorrowDate(Instant.now());
-        borrowSlip.setReturnDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
+        borrowSlip.setDueDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
         this.borrowSlipRepository.save(borrowSlip);
         List<BorrowSlipDetail> borrowSlipDetails = new ArrayList<>();
         for (String registrationId : borrowSlipAdminReq.getRegistrationIds()) {
@@ -179,6 +180,32 @@ public class BorrowSlipService {
             borrowSlipDetails.add(borrowSlipDetail);
         }
         borrowSlip.setBorrowSlipDetails(borrowSlipDetails);
+        return borrowSlip;
+    }
+
+    public BorrowSlip handleReturnBorrowSlip(ReturnBorrowSlipReq returnBorrowSlipReq) throws IdInvalidException {
+        BorrowSlip borrowSlip = this.borrowSlipRepository.findById(returnBorrowSlipReq.getBorrowSlipId()).orElse(null);
+        if (borrowSlip == null) {
+            throw new IdInvalidException("Phiếu mượn không tồn tại");
+        }
+        borrowSlip.setStatus(StatusBorrowSlipEnum.RETURNED);
+        borrowSlip.setReturnDate(Instant.now());
+        borrowSlip.setNote(returnBorrowSlipReq.getNote());
+        //loop through list registration request
+        for (ReturnBorrowSlipReq.RegistrationUniqueStatus registrationUniqueStatus : returnBorrowSlipReq.getRegistrationUniqueStatuses()) {
+            //find registration unique by registration id into list borrow slip details
+            RegistrationUnique registrationUnique = borrowSlip.getBorrowSlipDetails().stream()
+                    .filter(bd -> bd.getRegistrationUnique().getRegistrationId().equals(registrationUniqueStatus.getRegistrationId()))
+                    .findFirst()
+                    .map(BorrowSlipDetail::getRegistrationUnique)
+                    .orElse(null);
+            if (registrationUnique == null) {
+                continue;
+            }
+            registrationUnique.setStatus(registrationUniqueStatus.getStatus());
+            this.registrationUniqueRepository.save(registrationUnique);
+        }
+        this.borrowSlipRepository.save(borrowSlip);
         return borrowSlip;
     }
 }

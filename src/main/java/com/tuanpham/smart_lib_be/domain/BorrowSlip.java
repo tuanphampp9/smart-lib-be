@@ -26,9 +26,12 @@ public class BorrowSlip {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant expiredRegisterDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
+    private Instant dueDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant returnDate;
     @Enumerated(EnumType.STRING)
     private StatusBorrowSlipEnum status;
+    private String note;
 
     // one borrow slip has many borrow slip details
     @OneToMany(mappedBy = "borrowSlip", fetch = FetchType.LAZY)

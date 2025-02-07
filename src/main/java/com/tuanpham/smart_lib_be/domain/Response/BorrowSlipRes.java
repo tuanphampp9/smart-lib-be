@@ -28,11 +28,14 @@ public class BorrowSlipRes {
     private Instant expiredRegisterDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant returnDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
+    private Instant dueDate;
     @Enumerated(EnumType.STRING)
     private StatusBorrowSlipEnum status;
     private List<BorrowSlipDetailRes> borrowSlipDetails;
     @JsonIgnoreProperties(value = { "borrowSlips","hibernateLazyInitializer", "handler" })
     private CardRead cardRead;
+    private String note;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
