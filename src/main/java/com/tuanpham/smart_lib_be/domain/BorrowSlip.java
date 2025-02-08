@@ -56,7 +56,6 @@ public class BorrowSlip {
         this.createdAt = Instant.now();
         this.registerDate = Instant.now();
         this.expiredRegisterDate = Instant.now().plus(2, java.time.temporal.ChronoUnit.DAYS);
-        this.status = StatusBorrowSlipEnum.NOT_BORROWED;
     }
 
     @PreUpdate // action before update

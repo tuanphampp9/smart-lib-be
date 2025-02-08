@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.Publication;
+import com.tuanpham.smart_lib_be.domain.RegistrationUnique;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Response.PublicationRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
@@ -66,5 +67,13 @@ public class PublicationController {
         }
         this.publicationService.handleDeletePublication(id);
         return ResponseEntity.ok().body("Xóa thành công");
+    }
+
+    //get list registration unique
+    @GetMapping("/publications/registration-uniques")
+    public ResponseEntity<ResultPaginationDTO> getRegistrationUniques(
+            @Filter Specification<RegistrationUnique> spec, Pageable pageable
+    ) {
+        return ResponseEntity.ok().body(this.publicationService.handleGetRegistrationUniques(spec, pageable));
     }
 }

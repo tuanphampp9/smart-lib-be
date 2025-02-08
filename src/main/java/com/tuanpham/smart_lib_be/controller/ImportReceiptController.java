@@ -3,6 +3,7 @@ package com.tuanpham.smart_lib_be.controller;
 import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.ImportReceiptReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
+import com.tuanpham.smart_lib_be.mapper.ImportReceiptMapper;
 import com.tuanpham.smart_lib_be.service.ImportReceiptDetailService;
 import com.tuanpham.smart_lib_be.service.ImportReceiptService;
 import com.tuanpham.smart_lib_be.service.PublicationService;
@@ -88,6 +89,12 @@ public class ImportReceiptController {
     @GetMapping("/import-receipts")
     public ResponseEntity<ResultPaginationDTO> getAllImportReceipts(@Filter Specification<ImportReceipt> spec, Pageable pageable) {
         return ResponseEntity.ok().body(this.importReceiptService.handleGetAllImportReceipts(spec, pageable));
+    }
+
+    //get list of import receipt detail
+    @GetMapping("/import-receipts/import-receipt-details")
+    public ResponseEntity<ResultPaginationDTO> getAllImportReceiptDetails(@Filter Specification<ImportReceiptDetail> spec, Pageable pageable) {
+        return ResponseEntity.ok().body(this.importReceiptDetailService.handleGetAllImportReceiptDetails(spec, pageable));
     }
 
     //get import receipt by id

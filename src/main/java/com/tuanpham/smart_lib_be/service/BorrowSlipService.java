@@ -63,6 +63,7 @@ public class BorrowSlipService {
         //create borrow slip
         BorrowSlip borrowSlip = new BorrowSlip();
         borrowSlip.setCardRead(cardRead);
+        borrowSlip.setStatus(StatusBorrowSlipEnum.NOT_BORROWED);
         this.borrowSlipRepository.save(borrowSlip);
         List<BorrowSlipDetail> borrowSlipDetails = new ArrayList<>();
 
@@ -162,6 +163,7 @@ public class BorrowSlipService {
         borrowSlip.setCardRead(cardRead);
         borrowSlip.setBorrowDate(Instant.now());
         borrowSlip.setDueDate(Instant.now().plus(15, java.time.temporal.ChronoUnit.DAYS));
+        borrowSlip.setStatus(StatusBorrowSlipEnum.BORROWING);
         this.borrowSlipRepository.save(borrowSlip);
         List<BorrowSlipDetail> borrowSlipDetails = new ArrayList<>();
         for (String registrationId : borrowSlipAdminReq.getRegistrationIds()) {

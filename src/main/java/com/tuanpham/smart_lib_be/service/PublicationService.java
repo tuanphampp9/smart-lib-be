@@ -26,12 +26,13 @@ public class PublicationService {
     private final LanguageRepository languageRepository;
     private final WarehouseRepository warehouseRepository;
     private final CartUserRepository cartUserRepository;
+    private final RegistrationUniqueRepository registrationUniqueRepository;
 
     public PublicationService(PublicationRepository publicationRepository, PublicationMapper publicationMapper,
                               AuthorRepository authorRepository, CategoryRepository categoryRepository,
                               TopicRepository topicRepository, PublisherRepository publisherRepository,
                               LanguageRepository languageRepository, WarehouseRepository warehouseRepository,
-                              CartUserRepository cartUserRepository) {
+                              CartUserRepository cartUserRepository, RegistrationUniqueRepository registrationUniqueRepository) {
         this.publicationRepository = publicationRepository;
         this.publicationMapper = publicationMapper;
         this.authorRepository = authorRepository;
@@ -41,6 +42,7 @@ public class PublicationService {
         this.languageRepository = languageRepository;
         this.warehouseRepository = warehouseRepository;
         this.cartUserRepository = cartUserRepository;
+        this.registrationUniqueRepository = registrationUniqueRepository;
     }
 
     public boolean handlePublicationExist(String name) {
@@ -199,5 +201,23 @@ public class PublicationService {
 
     public void handleDeletePublication(Long id) {
         this.publicationRepository.deleteById(id);
+    }
+
+    public ResultPaginationDTO handleGetRegistrationUniques(Specification<RegistrationUnique> spec,
+                                                        Pageable pageable) {
+        Page<RegistrationUnique> pageRegistrationUniques = this.registrationUniqueRepository.findAll(spec, pageable);
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber()+1);
+        meta.setPageSize(pageRegistrationUniques.getSize());
+        meta.setTotal(pageRegistrationUniques.getTotalElements());// amount of elements
+        meta.setPages(pageRegistrationUniques.getTotalPages());// amount of pages
+        resultPaginationDTO.setMeta(meta);
+        // remove sensitive data
+        List<RegistrationUnique> listRegistrationUniques = pageRegistrationUniques.getContent().stream().map(
+                        r -> r)
+                .collect(Collectors.toList());
+        resultPaginationDTO.setResult(listRegistrationUniques);
+        return resultPaginationDTO;
     }
 }
