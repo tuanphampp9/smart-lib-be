@@ -4,6 +4,7 @@ import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipAdminReq;
 import com.tuanpham.smart_lib_be.domain.Request.BorrowSlipClientReq;
 import com.tuanpham.smart_lib_be.domain.Request.ReturnBorrowSlipReq;
+import com.tuanpham.smart_lib_be.domain.Response.BorrowSlipRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.service.BorrowSlipService;
 import com.tuanpham.smart_lib_be.service.CardReaderService;
@@ -65,6 +66,12 @@ public class BorrowSlipController {
     @PutMapping("/borrow-slips/{borrowSlipId}/return")
     public ResponseEntity<BorrowSlip> returnBorrowSlip(@Valid @RequestBody ReturnBorrowSlipReq returnBorrowSlipReq) throws IdInvalidException {
         return ResponseEntity.ok().body(this.borrowSlipService.handleReturnBorrowSlip(returnBorrowSlipReq));
+    }
+
+    // get borrow slip by id
+    @GetMapping("/borrow-slips/{borrowSlipId}")
+    public ResponseEntity<BorrowSlipRes> getBorrowSlipById(@PathVariable String borrowSlipId) throws IdInvalidException {
+        return ResponseEntity.ok().body(this.borrowSlipService.handleGetBorrowSlipById(borrowSlipId));
     }
 
 }

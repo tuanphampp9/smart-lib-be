@@ -114,6 +114,7 @@ public class BorrowSlipService {
                                         BorrowSlipRes.BorrowSlipDetailRes borrowSlipDetailRes = new BorrowSlipRes.BorrowSlipDetailRes();
                                         borrowSlipDetailRes.setId(bd.getId());
                                         borrowSlipDetailRes.setNameBook(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getName());
+                                        borrowSlipDetailRes.setPublicationId(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getId());
                                         borrowSlipDetailRes.setRegistrationUnique(bd.getRegistrationUnique());
                                         return borrowSlipDetailRes;
                                     }
@@ -209,5 +210,25 @@ public class BorrowSlipService {
         }
         this.borrowSlipRepository.save(borrowSlip);
         return borrowSlip;
+    }
+
+    public BorrowSlipRes handleGetBorrowSlipById(String borrowSlipId) throws IdInvalidException {
+        BorrowSlip borrowSlip = this.borrowSlipRepository.findById(borrowSlipId).orElse(null);
+        if (borrowSlip == null) {
+            throw new IdInvalidException("Phiếu mượn không tồn tại");
+        }
+        BorrowSlipRes borrowSlipRes = this.borrowSlipMapper.toBorrowSlipRes(borrowSlip);
+        List<BorrowSlipRes.BorrowSlipDetailRes> borrowSlipDetailResList = borrowSlip.getBorrowSlipDetails().stream().map(
+                bd -> {
+                    BorrowSlipRes.BorrowSlipDetailRes borrowSlipDetailRes = new BorrowSlipRes.BorrowSlipDetailRes();
+                    borrowSlipDetailRes.setId(bd.getId());
+                    borrowSlipDetailRes.setNameBook(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getName());
+                    borrowSlipDetailRes.setPublicationId(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getId());
+                    borrowSlipDetailRes.setRegistrationUnique(bd.getRegistrationUnique());
+                    return borrowSlipDetailRes;
+                }
+        ).collect(Collectors.toList());
+        borrowSlipRes.setBorrowSlipDetails(borrowSlipDetailResList);
+        return borrowSlipRes;
     }
 }

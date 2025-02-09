@@ -52,6 +52,7 @@ public class BorrowSlipRes {
         private String id;
         private RegistrationUnique registrationUnique;
         private String nameBook;
+        private Long publicationId;
     }
 
 }
