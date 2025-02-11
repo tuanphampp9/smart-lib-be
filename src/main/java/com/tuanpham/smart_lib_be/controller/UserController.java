@@ -1,5 +1,6 @@
 package com.tuanpham.smart_lib_be.controller;
 
+import com.tuanpham.smart_lib_be.domain.BorrowSlip;
 import com.tuanpham.smart_lib_be.domain.CardRead;
 import com.tuanpham.smart_lib_be.domain.CartUser;
 import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
@@ -139,10 +140,10 @@ public class UserController {
 
     // user rating
     @PostMapping("/users/ratings")
-    public ResponseEntity<RestResponse<String>> createRating(@Valid @RequestBody PubRatingReq pubRatingReq) throws IdInvalidException {
-        this.userService.handleCreateRating(pubRatingReq);
-        RestResponse<String> restResponse = new RestResponse<>();
-        restResponse.setData("Đánh giá thành công");
+    public ResponseEntity<RestResponse<BorrowSlipRes>> createRating(@Valid @RequestBody PubRatingReq pubRatingReq) throws IdInvalidException {
+        BorrowSlipRes borrowSlipRes = this.userService.handleCreateRating(pubRatingReq);
+        RestResponse<BorrowSlipRes> restResponse = new RestResponse<>();
+        restResponse.setData(borrowSlipRes);
         return ResponseEntity.status(HttpStatus.CREATED).body(restResponse);
     }
 

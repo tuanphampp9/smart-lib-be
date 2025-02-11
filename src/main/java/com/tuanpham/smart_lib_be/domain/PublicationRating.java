@@ -33,6 +33,12 @@ public class PublicationRating {
     @JoinColumn(name = "userId", insertable = false, updatable = false)
     private User user;
 
+    // one rating belong to borrow slip detail
+    @OneToOne(mappedBy = "publicationRating", cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER, optional = true)
+    @JsonIgnore
+    private BorrowSlipDetail borrowSlipDetail;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

@@ -4,6 +4,7 @@ import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Response.*;
+import com.tuanpham.smart_lib_be.mapper.BorrowSlipMapper;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
 import com.tuanpham.smart_lib_be.repository.*;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
@@ -25,17 +26,22 @@ public class UserService {
     private final PublicationRatingRepository publicationRatingRepository;
     private final PublicationRepository publicationRepository;
     private final CartUserRepository cartUserRepository;
+    private final BorrowSlipDetailRepository borrowSlipDetailRepository;
+    private final BorrowSlipMapper borrowSlipMapper;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper, PublicationRepository publicationRepository,
                        RoleService roleService, PublicationRatingRepository publicationRatingRepository,
-                       CartUserRepository cartUserRepository) {
+                       CartUserRepository cartUserRepository, BorrowSlipDetailRepository borrowSlipDetailRepository,
+                       BorrowSlipMapper borrowSlipMapper) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.userMapper = userMapper;
         this.publicationRatingRepository = publicationRatingRepository;
         this.publicationRepository = publicationRepository;
         this.cartUserRepository = cartUserRepository;
+        this.borrowSlipDetailRepository = borrowSlipDetailRepository;
+        this.borrowSlipMapper = borrowSlipMapper;
     }
 
     public User handleCreateUser(User user) {
@@ -174,27 +180,46 @@ public class UserService {
         return this.userRepository.findByEmail(email);
     }
 
-    public void handleCreateRating(PubRatingReq pubRatingReq) throws IdInvalidException {
+    public BorrowSlipRes handleCreateRating(PubRatingReq pubRatingReq) throws IdInvalidException {
         Publication publication = this.publicationRepository.findById(pubRatingReq.getPublicationId()).orElse(null);
         User user = this.userRepository.findById(pubRatingReq.getUserId()).orElse(null);
-        PublicationRating publicationRatingExist = this.publicationRatingRepository.findByUserIdAndPublicationId(
-                pubRatingReq.getUserId(), pubRatingReq.getPublicationId());
+        BorrowSlipDetail borrowSlipDetail = this.borrowSlipDetailRepository.findById(pubRatingReq.getBorrowSlipDetailId()).orElse(null);
+//        PublicationRating publicationRatingExist = this.publicationRatingRepository.findByUserIdAndPublicationId(
+//                pubRatingReq.getUserId(), pubRatingReq.getPublicationId());
         if (user == null) {
             throw new IdInvalidException("Người dùng không tồn tại");
         }
         if (publication == null) {
             throw new IdInvalidException("Ấn phẩm không tồn tại");
         }
-        if(publicationRatingExist != null) {
-            publicationRatingExist.setRating(pubRatingReq.getRating());
-            this.publicationRatingRepository.save(publicationRatingExist);
-            return;
-        }
+//        if(publicationRatingExist != null) {
+//            publicationRatingExist.setRating(pubRatingReq.getRating());
+//            this.publicationRatingRepository.save(publicationRatingExist);
+//            return;
+//        }
         PublicationRating publicationRating = new PublicationRating();
         publicationRating.setPublicationId(pubRatingReq.getPublicationId());
         publicationRating.setUserId(pubRatingReq.getUserId());
         publicationRating.setRating(pubRatingReq.getRating());
         this.publicationRatingRepository.save(publicationRating);
+        if(borrowSlipDetail != null) {
+            borrowSlipDetail.setPublicationRating(publicationRating);
+            this.borrowSlipDetailRepository.save(borrowSlipDetail);
+        }
+        BorrowSlipRes borrowSlipRes = this.borrowSlipMapper.toBorrowSlipRes(borrowSlipDetail.getBorrowSlip());
+        List<BorrowSlipRes.BorrowSlipDetailRes> borrowSlipDetailResList = borrowSlipDetail.getBorrowSlip().getBorrowSlipDetails().stream().map(
+                bd -> {
+                    BorrowSlipRes.BorrowSlipDetailRes borrowSlipDetailRes = new BorrowSlipRes.BorrowSlipDetailRes();
+                    borrowSlipDetailRes.setId(bd.getId());
+                    borrowSlipDetailRes.setNameBook(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getName());
+                    borrowSlipDetailRes.setPublicationId(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getId());
+                    borrowSlipDetailRes.setRegistrationUnique(bd.getRegistrationUnique());
+                    borrowSlipDetailRes.setPublicationRating(bd.getPublicationRating());
+                    return borrowSlipDetailRes;
+                }
+        ).collect(Collectors.toList());
+        borrowSlipRes.setBorrowSlipDetails(borrowSlipDetailResList);
+        return borrowSlipRes;
     }
 
     public Integer handleGetUserRatingByPublicationId(String userId, Long publicationId) {

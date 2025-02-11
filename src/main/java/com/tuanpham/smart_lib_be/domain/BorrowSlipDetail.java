@@ -23,4 +23,9 @@ public class BorrowSlipDetail {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "registrationId", referencedColumnName = "registrationId")
     private RegistrationUnique registrationUnique;
+
+    // one borrow slip detail has one publication rating
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "publicationRatingId", referencedColumnName = "id")
+    private PublicationRating publicationRating;
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tuanpham.smart_lib_be.domain.BorrowSlipDetail;
 import com.tuanpham.smart_lib_be.domain.CardRead;
+import com.tuanpham.smart_lib_be.domain.PublicationRating;
 import com.tuanpham.smart_lib_be.domain.RegistrationUnique;
 import com.tuanpham.smart_lib_be.util.constant.StatusBorrowSlipEnum;
 import jakarta.persistence.EnumType;
@@ -53,6 +54,7 @@ public class BorrowSlipRes {
         private RegistrationUnique registrationUnique;
         private String nameBook;
         private Long publicationId;
+        private PublicationRating publicationRating;
     }
 
 }

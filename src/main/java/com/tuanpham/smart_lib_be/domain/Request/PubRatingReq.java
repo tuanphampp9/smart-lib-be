@@ -9,4 +9,5 @@ public class PubRatingReq {
     private String userId;
     private Long publicationId;
     private int rating;
+    private String borrowSlipDetailId;
 }

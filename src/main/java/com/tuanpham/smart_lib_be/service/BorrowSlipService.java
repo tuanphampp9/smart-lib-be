@@ -116,6 +116,7 @@ public class BorrowSlipService {
                                         borrowSlipDetailRes.setNameBook(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getName());
                                         borrowSlipDetailRes.setPublicationId(bd.getRegistrationUnique().getImportReceiptDetail().getPublication().getId());
                                         borrowSlipDetailRes.setRegistrationUnique(bd.getRegistrationUnique());
+                                        borrowSlipDetailRes.setPublicationRating(bd.getPublicationRating());
                                         return borrowSlipDetailRes;
                                     }
                             ).collect(Collectors.toList());
