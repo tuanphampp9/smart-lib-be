@@ -68,6 +68,11 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<CartUser> cartUsers;
 
+    // one user have many post
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Post> posts;
+
     @PrePersist // action before save
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
