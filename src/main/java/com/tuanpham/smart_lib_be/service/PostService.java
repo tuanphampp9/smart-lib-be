@@ -1,9 +1,7 @@
 package com.tuanpham.smart_lib_be.service;
 
-import com.tuanpham.smart_lib_be.domain.Author;
 import com.tuanpham.smart_lib_be.domain.Post;
 import com.tuanpham.smart_lib_be.domain.Request.PostReq;
-import com.tuanpham.smart_lib_be.domain.Response.AuthorRes;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.PostMapper;
 import com.tuanpham.smart_lib_be.repository.PostRepository;
@@ -30,7 +28,7 @@ public class PostService {
         return this.postRepository.save(post);
     }
     
-    public Post handleUpdatePost(PostReq postReq, String id) throws IdInvalidException {
+    public Post handleUpdatePost(PostReq postReq, Long id) throws IdInvalidException {
         Post postToUpdate = this.postRepository.findById(id).orElse(null);
         if (postToUpdate == null) {
             throw new IdInvalidException("Bài viết không tồn tại");
@@ -39,8 +37,13 @@ public class PostService {
         return this.postRepository.save(postToUpdate);
     }
     
-    public Post handleGetPostById(String id) {
+    public Post handleGetPostById(Long id) {
         return this.postRepository.findById(id).orElse(null);
+    }
+
+    public Post handleUpdateViewCount(Post post) {
+        post.setViewCount(post.getViewCount() + 1);
+        return this.postRepository.save(post);
     }
 
     public ResultPaginationDTO handleGetAllPosts(Specification<Post> spec,
@@ -60,7 +63,7 @@ public class PostService {
         resultPaginationDTO.setResult(listPosts);
         return resultPaginationDTO;
     }
-    public void handleDeletePost(String id) {
+    public void handleDeletePost(Long id) {
         this.postRepository.deleteById(id);
     }
 }

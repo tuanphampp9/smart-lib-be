@@ -73,6 +73,11 @@ public class User {
     @JsonIgnore
     private List<Post> posts;
 
+    // one user have many publication requests
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<PublicationRequest> publicationRequests;
+
     @PrePersist // action before save
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
