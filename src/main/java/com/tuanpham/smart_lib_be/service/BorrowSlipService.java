@@ -34,17 +34,19 @@ public class BorrowSlipService {
     private final CardReaderService cardReaderService;
     private final BorrowSlipDetailRepository borrowSlipDetailRepository;
     private final BorrowSlipMapper borrowSlipMapper;
+    private final EmailService emailService;
 
     public BorrowSlipService(BorrowSlipRepository borrowSlipRepository, CartUserRepository cartUserRepository,
                              RegistrationUniqueRepository registrationUniqueRepository,
                              CardReaderService cardReaderService, BorrowSlipDetailRepository borrowSlipDetailRepository,
-                             BorrowSlipMapper borrowSlipMapper) {
+                             BorrowSlipMapper borrowSlipMapper, EmailService emailService) {
         this.borrowSlipRepository = borrowSlipRepository;
         this.cartUserRepository = cartUserRepository;
         this.registrationUniqueRepository = registrationUniqueRepository;
         this.cardReaderService = cardReaderService;
         this.borrowSlipDetailRepository = borrowSlipDetailRepository;
         this.borrowSlipMapper = borrowSlipMapper;
+        this.emailService = emailService;
     }
 
     public BorrowSlip handleCreateBorrowSlipForClient(BorrowSlipClientReq borrowSlipClientReq) throws IdInvalidException {
@@ -210,6 +212,9 @@ public class BorrowSlipService {
             this.registrationUniqueRepository.save(registrationUnique);
         }
         this.borrowSlipRepository.save(borrowSlip);
+        //send email to user
+        User newUser = borrowSlip.getCardRead().getUser();
+        this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo trả ấn phẩm thành công", "Cảm ơn bạn đã mượn ấn phẩm của thư viện, bạn có thể đánh giá ấn phẩm đã mượn trong vào 3 ngày tới!!! Chúng tôi rất vui khi nhận được các đánh giá thiết thực của bạn. Đây là link đánh giá: http://localhost:3000/my-account/borrowed-history/"+borrowSlip.getId());
         return borrowSlip;
     }
 
