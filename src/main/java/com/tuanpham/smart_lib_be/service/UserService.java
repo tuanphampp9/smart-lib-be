@@ -3,14 +3,17 @@ package com.tuanpham.smart_lib_be.service;
 import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
+import com.tuanpham.smart_lib_be.domain.Request.ReqForgetPassword;
 import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.mapper.BorrowSlipMapper;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
 import com.tuanpham.smart_lib_be.repository.*;
+import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -28,12 +31,15 @@ public class UserService {
     private final CartUserRepository cartUserRepository;
     private final BorrowSlipDetailRepository borrowSlipDetailRepository;
     private final BorrowSlipMapper borrowSlipMapper;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper, PublicationRepository publicationRepository,
                        RoleService roleService, PublicationRatingRepository publicationRatingRepository,
                        CartUserRepository cartUserRepository, BorrowSlipDetailRepository borrowSlipDetailRepository,
-                       BorrowSlipMapper borrowSlipMapper) {
+                       BorrowSlipMapper borrowSlipMapper, EmailService emailService,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.userMapper = userMapper;
@@ -42,6 +48,8 @@ public class UserService {
         this.cartUserRepository = cartUserRepository;
         this.borrowSlipDetailRepository = borrowSlipDetailRepository;
         this.borrowSlipMapper = borrowSlipMapper;
+        this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User handleCreateUser(User user) {
@@ -279,5 +287,19 @@ public class UserService {
         }
         cartUserExist.setQuantity(quantity);
         this.cartUserRepository.save(cartUserExist);
+    }
+
+    public User handleForgetPassword(ReqForgetPassword reqForgetPassword) throws IdInvalidException {
+        User user = this.userRepository.findByEmail(reqForgetPassword.getEmail());
+        if (user == null) {
+            throw new IdInvalidException("Email không tồn tại");
+        }
+        String newPassword = SecurityUtil.generateSecurePassword();
+        //send email to user
+        this.emailService.sendSimpleEmail(user.getEmail(), "Thông báo mật khẩu mới", "Mật khẩu mới của bạn là: " + newPassword+" . Vui lòng đăng nhập và đổi mật khẩu ngay sau khi đăng nhập");
+        //create password
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+        return this.userRepository.save(user);
     }
 }

@@ -53,6 +53,7 @@ public class SecurityConfiguration {
                 "/api/v1/publishers/**",
                 "/api/v1/warehouses/**",
                 "/api/v1/languages/**",
+                "/api/v1/users/forget-password",
 
         };
 

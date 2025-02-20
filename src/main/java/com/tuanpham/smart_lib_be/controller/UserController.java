@@ -6,6 +6,7 @@ import com.tuanpham.smart_lib_be.domain.CartUser;
 import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.ReqChangePassword;
+import com.tuanpham.smart_lib_be.domain.Request.ReqForgetPassword;
 import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
@@ -181,6 +182,12 @@ public class UserController {
         RestResponse<String> restResponse = new RestResponse<>();
         restResponse.setData("Giảm số lượng thành công");
         return ResponseEntity.status(HttpStatus.OK).body(restResponse);
+    }
+
+    // forget password
+    @PostMapping("/users/forget-password")
+    public ResponseEntity<User> forgetPassword(@RequestBody ReqForgetPassword reqForgetPassword) throws IdInvalidException {
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleForgetPassword(reqForgetPassword));
     }
 
 }
