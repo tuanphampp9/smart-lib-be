@@ -38,6 +38,11 @@ public class RegistrationUnique {
     @JsonIgnore
     private List<BorrowSlipDetail> borrowSlipDetails;
 
+    //one registration unique belong to many inventory check details
+    @OneToMany(mappedBy = "registrationUnique", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<InventoryCheckDetail> inventoryCheckDetails;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")

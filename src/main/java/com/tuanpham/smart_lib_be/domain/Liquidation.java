@@ -1,9 +1,8 @@
 package com.tuanpham.smart_lib_be.domain;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
+import com.tuanpham.smart_lib_be.util.constant.LiquidationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,27 +11,28 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "warehouses")
+@Table(name = "liquidations")
 @Getter
 @Setter
-public class Warehouse {
+public class Liquidation {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-    private String type;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Enumerated(EnumType.STRING)
+    private LiquidationStatus status;
+    private String receiverName;
+    private String receiverContact;
+    private String note;
 
-    private String name;
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    // one warehouse have many publications
-    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Publication> publications;
+    //one liquidation belong to one user
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    // one warehouse have many inventory checks
-    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<InventoryCheck> inventoryChecks;
+    //one liquidation has many liquidation details
+    @OneToMany(mappedBy = "liquidation")
+    private List<LiquidationDetail> liquidationDetails;
+
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;

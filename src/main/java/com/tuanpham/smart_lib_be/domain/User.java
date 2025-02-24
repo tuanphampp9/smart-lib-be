@@ -51,6 +51,17 @@ public class User {
     private String updatedBy;
 
 
+    //one user have many inventory checks
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<InventoryCheck> inventoryChecks;
+
+    //one user have many liquidations
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Liquidation> liquidations;
+
+
     // many users belong to one role
     @ManyToOne
     @JoinColumn(name = "role_id")

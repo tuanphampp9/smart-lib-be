@@ -1,9 +1,8 @@
 package com.tuanpham.smart_lib_be.domain;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
+import com.tuanpham.smart_lib_be.util.constant.InventoryCheckStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,27 +11,32 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "warehouses")
+@Table(name = "inventory_checks")
 @Getter
 @Setter
-public class Warehouse {
+public class InventoryCheck {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-    private String type;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String name;
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    // one warehouse have many publications
-    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Publication> publications;
+    //one inventory check belong to one warehouse
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
-    // one warehouse have many inventory checks
-    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<InventoryCheck> inventoryChecks;
+    //one inventory check belong to one user
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    //one inventory check has many inventory check details
+    @OneToMany(mappedBy = "inventoryCheck")
+    private List<InventoryCheckDetail> inventoryCheckDetails;
+
+    private String note;
+
+    @Enumerated(EnumType.STRING)
+    private InventoryCheckStatus status;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
