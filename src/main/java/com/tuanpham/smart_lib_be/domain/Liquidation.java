@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import com.tuanpham.smart_lib_be.util.constant.LiquidationStatus;
 import jakarta.persistence.*;
@@ -27,6 +28,7 @@ public class Liquidation {
     //one liquidation belong to one user
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "role","cardRead","cartUsers", "publicationRatings","refreshToken"})
     private User user;
 
     //one liquidation has many liquidation details
@@ -45,6 +47,7 @@ public class Liquidation {
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
         this.createdAt = Instant.now();
+        this.status = LiquidationStatus.PENDING;
     }
 
     @PreUpdate // action before update

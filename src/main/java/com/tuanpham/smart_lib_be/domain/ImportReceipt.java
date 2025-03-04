@@ -1,6 +1,7 @@
 package com.tuanpham.smart_lib_be.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tuanpham.smart_lib_be.util.SecurityUtil;
 import jakarta.persistence.*;
@@ -28,6 +29,12 @@ public class ImportReceipt {
     @OneToMany(mappedBy = "importReceipt", fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "importReceipt", "hibernateLazyInitializer", "handler"})
     private List<ImportReceiptDetail> importReceiptDetails;
+
+    //one import receipt belong to one user
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;

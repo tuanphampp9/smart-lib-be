@@ -1,5 +1,6 @@
 package com.tuanpham.smart_lib_be.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tuanpham.smart_lib_be.util.constant.LiquidationDetailStatus;
 import com.tuanpham.smart_lib_be.util.constant.LiquidationStatus;
 import jakarta.persistence.*;
@@ -18,6 +19,7 @@ public class LiquidationDetail {
     //one liquidation detail belong to one liquidation
     @ManyToOne
     @JoinColumn(name = "liquidation_id")
+    @JsonIgnore
     private Liquidation liquidation;
 
     //one liquidation detail belong to one registration_unique

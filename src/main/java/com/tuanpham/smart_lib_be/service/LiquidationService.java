@@ -2,11 +2,14 @@ package com.tuanpham.smart_lib_be.service;
 
 import com.tuanpham.smart_lib_be.domain.InventoryCheck;
 import com.tuanpham.smart_lib_be.domain.Liquidation;
+import com.tuanpham.smart_lib_be.domain.Request.LiquidationCrqReq;
 import com.tuanpham.smart_lib_be.domain.Request.LiquidationDetailCreate;
 import com.tuanpham.smart_lib_be.domain.Request.LiquidationReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
+import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.mapper.LiquidationMapper;
 import com.tuanpham.smart_lib_be.repository.LiquidationRepository;
+import com.tuanpham.smart_lib_be.repository.UserRepository;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,13 +23,25 @@ import java.util.stream.Collectors;
 public class LiquidationService {
     private final LiquidationRepository liquidationRepository;
     private final LiquidationMapper liquidationMapper;
-    public LiquidationService(LiquidationRepository liquidationRepository, LiquidationMapper liquidationMapper) {
+    private final UserRepository userRepository;
+    public LiquidationService(LiquidationRepository liquidationRepository, LiquidationMapper liquidationMapper,
+                              UserRepository userRepository) {
         this.liquidationRepository = liquidationRepository;
         this.liquidationMapper = liquidationMapper;
+        this.userRepository = userRepository;
     }
     
-    public Liquidation handleCreateLiquidation(Liquidation liquidation) {
-        return this.liquidationRepository.save(liquidation);
+    public Liquidation handleCreateLiquidation(LiquidationCrqReq liquidationCrqReq) throws IdInvalidException {
+        Liquidation liquidationToSave = new Liquidation();
+        liquidationToSave.setReceiverName(liquidationCrqReq.getReceiverName());
+        liquidationToSave.setReceiverContact(liquidationCrqReq.getReceiverContact());
+        liquidationToSave.setNote(liquidationCrqReq.getNote());
+        User user = this.userRepository.findById(liquidationCrqReq.getUserId()).orElse(null);
+        if(user == null) {
+            throw new IdInvalidException("Người dùng không tồn tại");
+        }
+        liquidationToSave.setUser(user);
+        return this.liquidationRepository.save(liquidationToSave);
     }
     
     public Liquidation handleUpdateLiquidation(LiquidationReq liquidationReq, Long id) throws IdInvalidException {

@@ -89,6 +89,11 @@ public class User {
     @JsonIgnore
     private List<PublicationRequest> publicationRequests;
 
+    // one user have many import receipts
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<ImportReceipt> importReceipts;
+
     @PrePersist // action before save
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";

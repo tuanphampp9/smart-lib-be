@@ -3,6 +3,7 @@ package com.tuanpham.smart_lib_be.controller;
 import com.tuanpham.smart_lib_be.domain.InventoryCheck;
 import com.tuanpham.smart_lib_be.domain.Liquidation;
 import com.tuanpham.smart_lib_be.domain.Request.InventoryCheckRequest;
+import com.tuanpham.smart_lib_be.domain.Request.LiquidationCrqReq;
 import com.tuanpham.smart_lib_be.domain.Request.LiquidationDetailCreate;
 import com.tuanpham.smart_lib_be.domain.Request.LiquidationReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
@@ -31,9 +32,9 @@ public class LiquidationController {
 
     //create new liquidation
     @PostMapping("/liquidations")
-    public ResponseEntity<Liquidation> create(@Valid @RequestBody Liquidation liquidation)
+    public ResponseEntity<Liquidation> create(@Valid @RequestBody LiquidationCrqReq liquidationCrqReq)
             throws IdInvalidException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.liquidationService.handleCreateLiquidation(liquidation));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.liquidationService.handleCreateLiquidation(liquidationCrqReq));
     }
 
     //update liquidation

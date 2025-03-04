@@ -7,6 +7,7 @@ import com.tuanpham.smart_lib_be.domain.Request.LiquidationDetailCreate;
 import com.tuanpham.smart_lib_be.repository.LiquidationDetailRepository;
 import com.tuanpham.smart_lib_be.repository.LiquidationRepository;
 import com.tuanpham.smart_lib_be.repository.RegistrationUniqueRepository;
+import com.tuanpham.smart_lib_be.util.constant.PublicationStatusEnum;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +33,22 @@ public class LiquidationDetailService {
         }
         List<LiquidationDetail> liquidationDetails = this.liquidationDetailRepository.findByLiquidation(liquidationToUpdate);
         //delete all old liquidation detail
-        liquidationDetails.forEach(this.liquidationDetailRepository::delete);
+        liquidationDetails.forEach(
+                liquidationDetail -> {
+                    RegistrationUnique registrationUnique = liquidationDetail.getRegistrationUnique();
+                    //update registration unique status
+                    registrationUnique.setStatus(PublicationStatusEnum.AVAILABLE);
+                    this.registrationUniqueRepository.save(registrationUnique);
+                    this.liquidationDetailRepository.delete(liquidationDetail);
+                }
+        );
         //create new list liquidation detail
         List<LiquidationDetail> listLiquidationDetailNew = new ArrayList<>();
         liquidationDetailCreates.forEach(liquidationDetailCreate -> {
             RegistrationUnique registrationUnique = this.registrationUniqueRepository.findByRegistrationId(liquidationDetailCreate.getRegistrationId());
+            //update registration unique status
+            registrationUnique.setStatus(PublicationStatusEnum.LIQUIDATED);
+            this.registrationUniqueRepository.save(registrationUnique);
             LiquidationDetail liquidationDetail = new LiquidationDetail();
             liquidationDetail.setConditionStatus(liquidationDetailCreate.getConditionStatus());
             liquidationDetail.setLiquidation(liquidationToUpdate);
