@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class InventoryCheckRequest {
-    private Warehouse warehouse;
+    private String warehouseId;
     private String note;
     private InventoryCheckStatus status;
 }

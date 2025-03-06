@@ -6,6 +6,7 @@ import com.tuanpham.smart_lib_be.domain.Language;
 import com.tuanpham.smart_lib_be.domain.Request.AuthorReq;
 import com.tuanpham.smart_lib_be.domain.Request.InventoryCheckDetailCreate;
 import com.tuanpham.smart_lib_be.domain.Request.InventoryCheckRequest;
+import com.tuanpham.smart_lib_be.domain.Request.InventoryReqCreate;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.service.InventoryCheckDetailService;
 import com.tuanpham.smart_lib_be.service.InventoryCheckService;
@@ -17,6 +18,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,9 +34,9 @@ public class InventoryCheckController {
 
     //create new inventory check
     @PostMapping("/inventory-checks")
-    public ResponseEntity<InventoryCheck> create(@Valid @RequestBody InventoryCheck inventoryCheck)
+    public ResponseEntity<InventoryCheck> create(@Valid @RequestBody InventoryReqCreate inventoryReqCreate)
             throws IdInvalidException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.inventoryCheckService.handleCreateInventoryCheck(inventoryCheck));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.inventoryCheckService.handleCreateInventoryCheck(inventoryReqCreate));
     }
 
     //update inventory check
@@ -64,9 +67,9 @@ public class InventoryCheckController {
 
     //api create inventory check detail
     @PostMapping("/inventory-checks/{id}/details")
-    public ResponseEntity<InventoryCheck> createInventoryCheckDetail(@Valid @RequestBody InventoryCheckDetailCreate inventoryCheckDetailCreate, @PathVariable("id") Long id)
+    public ResponseEntity<InventoryCheck> createInventoryCheckDetail(@Valid @RequestBody List<InventoryCheckDetailCreate> inventoryCheckDetailCreates, @PathVariable("id") Long id)
             throws IdInvalidException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.inventoryCheckDetailService.handleCreateInventoryCheckDetail(inventoryCheckDetailCreate, id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.inventoryCheckDetailService.handleCreateInventoryCheckDetail(inventoryCheckDetailCreates, id));
     }
 
 }

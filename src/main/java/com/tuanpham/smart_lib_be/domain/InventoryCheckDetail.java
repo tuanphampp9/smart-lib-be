@@ -1,5 +1,6 @@
 package com.tuanpham.smart_lib_be.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class InventoryCheckDetail {
     //one inventory check detail belong to one inventory check
     @ManyToOne
     @JoinColumn(name = "inventory_check_id")
+    @JsonIgnore
     private InventoryCheck inventoryCheck;
 
     //one inventory check detail belong to one registration unique
