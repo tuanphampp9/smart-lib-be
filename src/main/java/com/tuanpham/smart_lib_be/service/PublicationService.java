@@ -1,22 +1,35 @@
 package com.tuanpham.smart_lib_be.service;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.PublicationReq;
 import com.tuanpham.smart_lib_be.domain.Response.PublicationRes;
+import com.tuanpham.smart_lib_be.domain.Response.RecommendationResponse;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.PublicationMapper;
 import com.tuanpham.smart_lib_be.repository.*;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class PublicationService {
+    private static final Logger log = LoggerFactory.getLogger(PublicationService.class);
     private final PublicationRepository publicationRepository;
     private final PublicationMapper publicationMapper;
     private final AuthorRepository authorRepository;
@@ -27,6 +40,7 @@ public class PublicationService {
     private final WarehouseRepository warehouseRepository;
     private final CartUserRepository cartUserRepository;
     private final RegistrationUniqueRepository registrationUniqueRepository;
+    private final WebClient webClient = WebClient.create();
 
     public PublicationService(PublicationRepository publicationRepository, PublicationMapper publicationMapper,
                               AuthorRepository authorRepository, CategoryRepository categoryRepository,
@@ -220,4 +234,37 @@ public class PublicationService {
         resultPaginationDTO.setResult(listRegistrationUniques);
         return resultPaginationDTO;
     }
+
+    public List<Publication> handleGetPublicationSuggestions(Long id) {
+        WebClient webClient = WebClient.create("http://localhost:8000");
+
+        // Gọi API và chờ kết quả JSON
+        String jsonResponse = webClient.get()
+                .uri("/recommendations/" + id)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // Chờ lấy dữ liệu
+
+        List<Publication> publications = new ArrayList<>();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(jsonResponse);
+            JsonNode recommendedBooksNode = rootNode.get("recommended_books");
+
+            int[] recommendedBooks = objectMapper.convertValue(recommendedBooksNode, int[].class);
+            for (int publicationId : recommendedBooks) {
+                Publication publication = this.publicationRepository.findById((long) publicationId).orElse(null);
+                if (publication != null) {
+                    log.info("Publication: " + publication.getName());
+                    publications.add(publication);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return publications;
+    }
+
 }

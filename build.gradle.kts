@@ -41,6 +41,9 @@ dependencies {
 
 	// import/export excel
 	implementation("org.apache.poi:poi-ooxml:5.2.4")
+
+	//webflux
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 tasks.withType<Test> {
