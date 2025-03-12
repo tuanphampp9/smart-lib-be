@@ -85,4 +85,12 @@ public class CardReaderController {
         cardRead.setLocked(!cardRead.isLocked());
         return ResponseEntity.ok(this.cardReaderService.handleCreateCardReader(cardRead));
     }
+
+    //renew card reader
+    @PutMapping("/card-readers/renew/{id}")
+    @ApiMessage("Renew card reader")
+    public ResponseEntity<CardRead> renewCardReader(@PathVariable("id") String id)
+            throws IdInvalidException {
+        return ResponseEntity.ok(this.cardReaderService.handleRenewCardReader(id));
+    }
 }

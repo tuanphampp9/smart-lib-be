@@ -13,10 +13,12 @@ import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -301,5 +303,20 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(hashedPassword);
         return this.userRepository.save(user);
+    }
+
+    //if after 7 day, user not active account, account will be deleted
+    //cron run every saturday (8 AM)
+    @Scheduled(cron = "0 0 8 ? * SAT")
+    public void deleteUserNotActive() {
+        List<User> users = this.userRepository.findAll();
+        for (User user : users) {
+            if (
+                    user.getCreatedAt().plus(7, java.time.temporal.ChronoUnit.DAYS).isBefore(Instant.now())
+                            && !user.isActive()
+            ) {
+                this.userRepository.delete(user);
+            }
+        }
     }
 }

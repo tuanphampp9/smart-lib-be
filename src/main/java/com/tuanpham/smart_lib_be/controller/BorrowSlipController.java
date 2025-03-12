@@ -74,4 +74,10 @@ public class BorrowSlipController {
         return ResponseEntity.ok().body(this.borrowSlipService.handleGetBorrowSlipById(borrowSlipId));
     }
 
+    // renew borrow slip
+    @PutMapping("/borrow-slips/{borrowSlipId}/renew")
+    public ResponseEntity<BorrowSlip> renewBorrowSlip(@PathVariable String borrowSlipId) throws IdInvalidException {
+        return ResponseEntity.ok().body(this.borrowSlipService.handleRenewBorrowSlip(borrowSlipId));
+    }
+
 }

@@ -18,7 +18,9 @@ import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -236,5 +238,57 @@ public class BorrowSlipService {
         ).collect(Collectors.toList());
         borrowSlipRes.setBorrowSlipDetails(borrowSlipDetailResList);
         return borrowSlipRes;
+    }
+
+    public BorrowSlip handleRenewBorrowSlip(String borrowSlipId) throws IdInvalidException {
+        BorrowSlip borrowSlip = this.borrowSlipRepository.findById(borrowSlipId).orElse(null);
+        if (borrowSlip == null) {
+            throw new IdInvalidException("Phiếu mượn không tồn tại");
+        }
+        borrowSlip.setDueDate(borrowSlip.getDueDate().plus(7, java.time.temporal.ChronoUnit.DAYS));
+        borrowSlip.setRenewDueDate(borrowSlip.getRenewDueDate() + 1);
+        this.borrowSlipRepository.save(borrowSlip);
+        return borrowSlip;
+    }
+
+    //if overdue date, email user and update the status of borrow slip
+    //run cron job every day (5:00 PM) to check due date
+    @Scheduled(cron = "0 0 17 * * *")
+    @Transactional
+    public void handleCheckDueDate() {
+        List<BorrowSlip> borrowSlips = this.borrowSlipRepository.findAllByStatus(StatusBorrowSlipEnum.BORROWING);
+        for (BorrowSlip borrowSlip : borrowSlips) {
+            if (Instant.now().isAfter(borrowSlip.getDueDate())) {
+                borrowSlip.setStatus(StatusBorrowSlipEnum.OVERDUE);
+                this.borrowSlipRepository.save(borrowSlip);
+                //send email to user
+                User newUser = borrowSlip.getCardRead().getUser();
+                this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo quá hạn trả ấn phẩm với mã phiếu mượn: "+borrowSlip.getId(), "Bạn đã quá hạn trả ấn phẩm, vui lòng tới thư viện để trả ấn phẩm ngay tại thư viện để tránh phạt tiền. Xin cảm ơn!!!");
+            }
+        }
+    }
+
+    //if expired register date, email user and delete borrow slip
+    //run cron job every day (5:00 PM) to check expired register date
+    @Scheduled(cron = "0 0 17 * * *")
+    @Transactional
+    public void handleCheckExpiredRegisterDate() {
+        List<BorrowSlip> borrowSlips = this.borrowSlipRepository.findAllByStatus(StatusBorrowSlipEnum.NOT_BORROWED);
+        for (BorrowSlip borrowSlip : borrowSlips) {
+            if (Instant.now().isAfter(borrowSlip.getExpiredRegisterDate())) {
+                //send email to user
+                User newUser = borrowSlip.getCardRead().getUser();
+                this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo hết hạn đăng ký mượn ấn phẩm với mã phiếu mượn: "+borrowSlip.getId(), "Bạn đã hết hạn đăng ký mượn ấn phẩm, phiếu của bạn đã bị hủy. Vui lòng đăng ký mượn lại ấn phẩm khác. Xin cảm ơn!!!");
+                //delete borrow slip
+                List<BorrowSlipDetail> borrowSlipDetails = borrowSlip.getBorrowSlipDetails();
+                for (BorrowSlipDetail borrowSlipDetail : borrowSlipDetails) {
+                    RegistrationUnique registrationUnique = borrowSlipDetail.getRegistrationUnique();
+                    registrationUnique.setStatus(PublicationStatusEnum.AVAILABLE);
+                    this.registrationUniqueRepository.save(registrationUnique);
+                    this.borrowSlipDetailRepository.delete(borrowSlipDetail);
+                }
+                this.borrowSlipRepository.delete(borrowSlip);
+            }
+        }
     }
 }

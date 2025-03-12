@@ -1,13 +1,8 @@
 package com.tuanpham.smart_lib_be.service;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuanpham.smart_lib_be.domain.*;
-import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
-import com.tuanpham.smart_lib_be.domain.Request.PublicationReq;
 import com.tuanpham.smart_lib_be.domain.Response.PublicationRes;
-import com.tuanpham.smart_lib_be.domain.Response.RecommendationResponse;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.mapper.PublicationMapper;
 import com.tuanpham.smart_lib_be.repository.*;
@@ -17,14 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -265,6 +257,23 @@ public class PublicationService {
         }
 
         return publications;
+    }
+
+    //update model suggestion publications
+    //run cron job to update model (5PM everyday)
+    @Scheduled(cron = "0 0 17 * * *")
+    public void updateModelSuggestionPublications() {
+        log.info("Updating model suggestion publications...");
+        WebClient webClient = WebClient.create("http://localhost:8000");
+
+        // Gọi API và chờ kết quả JSON
+        String jsonResponse = webClient.post()
+                .uri("/train")
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // Chờ lấy dữ liệu
+
+        log.info("Model suggestion publications updated!");
     }
 
 }

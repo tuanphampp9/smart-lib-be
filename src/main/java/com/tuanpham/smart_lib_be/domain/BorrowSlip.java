@@ -32,6 +32,7 @@ public class BorrowSlip {
     @Enumerated(EnumType.STRING)
     private StatusBorrowSlipEnum status;
     private String note;
+    private int renewDueDate;
 
     // one borrow slip has many borrow slip details
     @OneToMany(mappedBy = "borrowSlip", fetch = FetchType.LAZY)
@@ -56,6 +57,7 @@ public class BorrowSlip {
         this.createdAt = Instant.now();
         this.registerDate = Instant.now();
         this.expiredRegisterDate = Instant.now().plus(2, java.time.temporal.ChronoUnit.DAYS);
+        this.renewDueDate = 0;
     }
 
     @PreUpdate // action before update

@@ -7,6 +7,7 @@ import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
 import com.tuanpham.smart_lib_be.domain.Role;
 import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.repository.CardReaderRepository;
+import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -57,5 +58,14 @@ public class CardReaderService {
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listCardReaders);
         return resultPaginationDTO;
+    }
+
+    public CardRead handleRenewCardReader(String cardId) throws IdInvalidException {
+        CardRead cardRead = this.cardReaderRepository.findByCardId(cardId).orElse(null);
+        if (cardRead == null) {
+            throw new IdInvalidException("Thẻ đọc không tồn tại");
+        }
+        cardRead.setExpiredAt(cardRead.getExpiredAt().plusYears(1));
+        return this.cardReaderRepository.save(cardRead);
     }
 }

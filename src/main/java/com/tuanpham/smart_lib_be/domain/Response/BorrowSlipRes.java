@@ -37,6 +37,7 @@ public class BorrowSlipRes {
     @JsonIgnoreProperties(value = { "borrowSlips","hibernateLazyInitializer", "handler" })
     private CardRead cardRead;
     private String note;
+    private int renewDueDate;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+7")
     private Instant createdAt;
