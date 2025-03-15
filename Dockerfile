@@ -1,7 +1,9 @@
 FROM gradle:7.6.1-jdk17 AS build
 WORKDIR /app
 COPY . .
-RUN gradle clean build -x test --no-daemon
+
+RUN chmod +x ./gradlew
+RUN ./gradlew clean build -x test --no-daemon
 
 FROM openjdk:17-jdk-slim
 WORKDIR /app
