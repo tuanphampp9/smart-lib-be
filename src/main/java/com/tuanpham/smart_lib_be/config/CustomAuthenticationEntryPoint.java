@@ -29,19 +29,15 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value()); // Đặt status code
+        this.delegate.commence(request, response, authException);
         response.setContentType("application/json;charset=UTF-8");
-
-        RestResponse<Object> res = new RestResponse<>();
+        RestResponse<Object> res = new RestResponse<Object>();
         res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-
-        String errorMessage = Optional.ofNullable(authException.getCause())
-                .map(Throwable::getMessage)
+        String errorMessage = Optional.ofNullable(authException.getCause()).map(Throwable::getMessage)
                 .orElse(authException.getMessage());
         res.setError(errorMessage);
         res.setMessage("Token is invalid (expired, incorrect format, or not passed JWT in header)...");
 
         mapper.writeValue(response.getWriter(), res);
     }
-
 }
