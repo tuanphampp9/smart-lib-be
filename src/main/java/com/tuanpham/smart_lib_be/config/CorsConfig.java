@@ -15,7 +15,7 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
-                Arrays.asList("http://localhost:3000", "http://localhost:4173", "http://localhost:5173")); // Allow all
+                Arrays.asList("http://localhost:3000", "http://localhost:4173", "http://localhost:5173","https://smart-fe-build.vercel.app/")); // Allow all
         // origins
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
                 "OPTIONS")); // Allowed methods
