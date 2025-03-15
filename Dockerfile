@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy file jar vào container
-COPY build/libs/*.jar app.jar
+COPY build/libs/smart-lib-be-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port (nên match với port của Spring Boot)
 EXPOSE 8080
