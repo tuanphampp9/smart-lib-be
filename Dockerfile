@@ -1,14 +1,11 @@
-# Sử dụng image OpenJDK
-FROM openjdk:17-jdk-slim
-
-# Tạo thư mục app trong container
+# Sử dụng image của Gradle để build
+FROM gradle:7.6.1-jdk17 AS build
 WORKDIR /app
+COPY . .
+RUN gradle clean build -x test
 
-# Copy file jar vào container
-COPY build/libs/smart-lib-be-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose port (nên match với port của Spring Boot)
-EXPOSE 8080
-
-# Command để chạy ứng dụng
+# Sau đó copy file jar đã build vào container
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
