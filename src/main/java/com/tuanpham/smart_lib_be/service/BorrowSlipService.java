@@ -216,7 +216,7 @@ public class BorrowSlipService {
         this.borrowSlipRepository.save(borrowSlip);
         //send email to user
         User newUser = borrowSlip.getCardRead().getUser();
-        this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo trả ấn phẩm thành công", "Cảm ơn bạn đã mượn ấn phẩm của thư viện, bạn có thể đánh giá ấn phẩm đã mượn trong vào 3 ngày tới!!! Chúng tôi rất vui khi nhận được các đánh giá thiết thực của bạn. Đây là link đánh giá: http://localhost:3000/my-account/borrowed-history/"+borrowSlip.getId());
+        this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo trả ấn phẩm thành công", "Cảm ơn bạn đã mượn ấn phẩm của thư viện, bạn có thể đánh giá ấn phẩm đã mượn trong vào 3 ngày tới!!! Chúng tôi rất vui khi nhận được các đánh giá thiết thực của bạn. Đây là link đánh giá: https://smart-fe-build-r2i6wmik7-tuanphampp9s-projects.vercel.app/my-account/borrowed-history/"+borrowSlip.getId());
         return borrowSlip;
     }
 
