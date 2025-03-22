@@ -44,6 +44,10 @@ dependencies {
 
 	//webflux
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+	//setup websocket
+	implementation("org.springframework.boot:spring-boot-starter-websocket")
+
 }
 
 tasks.withType<Test> {
