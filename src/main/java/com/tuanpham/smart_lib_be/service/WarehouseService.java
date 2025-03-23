@@ -1,14 +1,17 @@
 package com.tuanpham.smart_lib_be.service;
 
 import com.tuanpham.smart_lib_be.domain.Category;
+import com.tuanpham.smart_lib_be.domain.Publication;
 import com.tuanpham.smart_lib_be.domain.Request.WarehouseReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
+import com.tuanpham.smart_lib_be.domain.Response.WarehousePub;
 import com.tuanpham.smart_lib_be.domain.Response.WarehouseRes;
 import com.tuanpham.smart_lib_be.domain.Warehouse;
 import com.tuanpham.smart_lib_be.mapper.WarehouseMapper;
 import com.tuanpham.smart_lib_be.repository.CategoryRepository;
 import com.tuanpham.smart_lib_be.repository.PublicationRepository;
 import com.tuanpham.smart_lib_be.repository.WarehouseRepository;
+import com.tuanpham.smart_lib_be.util.constant.PublicationStatusEnum;
 import com.tuanpham.smart_lib_be.util.error.IdInvalidException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -148,5 +152,45 @@ public class WarehouseService {
                 throw new IllegalArgumentException("Lỗi khi đọc file excel");
             }
         }
+    }
+
+    public List<WarehousePub> handleGetAllWarehousesWithPublications() {
+        List<Warehouse> listWarehouses = this.warehouseRepository.findAll();
+        List<WarehousePub> listWarehousePubs = new ArrayList<>();
+        for(Warehouse warehouse : listWarehouses) {
+            WarehousePub warehousePub = new WarehousePub();
+            warehousePub.setId(warehouse.getId());
+            warehousePub.setName(warehouse.getName());
+            List<WarehousePub.Publication> listPublications = new ArrayList<>();
+            warehouse.getPublications().forEach(p -> {
+                WarehousePub.Publication publication = new WarehousePub.Publication();
+                publication.setId(p.getId());
+                publication.setPublicationName(p.getName());
+                //handle quantity publication
+                publication.setQuantity(countQuantityPublication(p.getId()));
+                publication.setAvailableQuantity(countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.AVAILABLE));
+                publication.setBorrowedQuantity(countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.BORROWED));
+                publication.setLostQuantity(countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.LOST));
+                listPublications.add(publication);
+            });
+            warehousePub.setPublications(listPublications);
+            listWarehousePubs.add(warehousePub);
+        }
+        return listWarehousePubs;
+    }
+
+    public long countQuantityPublication(Long publicationId) {
+        Publication publication = this.publicationRepository.findById(publicationId).orElse(null);
+        if(publication == null) {
+            return 0;
+        }
+        return this.publicationRepository.countPublicationImportReceiptDetails(publicationId);
+    }
+    public long countQuantityPublicationByStatus(Long publicationId, PublicationStatusEnum status) {
+        Publication publication = this.publicationRepository.findById(publicationId).orElse(null);
+        if(publication == null) {
+            return 0;
+        }
+        return this.publicationRepository.countPublicationByStatus(publicationId, status);
     }
 }

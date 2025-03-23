@@ -2,6 +2,7 @@ package com.tuanpham.smart_lib_be.controller;
 
 import com.tuanpham.smart_lib_be.domain.Request.WarehouseReq;
 import com.tuanpham.smart_lib_be.domain.Response.ResultPaginationDTO;
+import com.tuanpham.smart_lib_be.domain.Response.WarehousePub;
 import com.tuanpham.smart_lib_be.domain.Response.WarehouseRes;
 import com.tuanpham.smart_lib_be.domain.Warehouse;
 import com.tuanpham.smart_lib_be.service.WarehouseService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -75,5 +77,12 @@ public class WarehouseController {
     public ResponseEntity<String> importDataFromExcel(@RequestParam("file") MultipartFile file) throws IOException {
         this.warehouseService.saveAllFromExcel(file);
         return ResponseEntity.ok().body("Import thành công");
+    }
+    //get all warehouses
+    @GetMapping("/warehouses/list-publications")
+    public ResponseEntity<List<WarehousePub>> getAllWarehousesWithPublications(
+
+    ) {
+        return ResponseEntity.ok().body(this.warehouseService.handleGetAllWarehousesWithPublications());
     }
 }
