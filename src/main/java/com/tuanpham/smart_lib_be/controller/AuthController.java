@@ -128,7 +128,7 @@ public class AuthController {
                         throw new IdInvalidException("Refresh token is empty");
                 }
                 // check valid refresh token
-                Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refresh_token);
+                Jwt decodedToken = this.securityUtil.checkValidToken(refresh_token);
                 String email = decodedToken.getSubject();
 
                 // check user by token and email

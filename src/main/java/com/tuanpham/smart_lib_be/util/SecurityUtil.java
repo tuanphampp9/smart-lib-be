@@ -95,16 +95,49 @@ public class SecurityUtil {
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, JWT_ALGORITHM.getName());
     }
 
-    public Jwt checkValidRefreshToken(String token){
+    public Jwt checkValidToken(String token){
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
                 getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
 
         try {
-            return jwtDecoder.decode(token);
+            Jwt jwt = jwtDecoder.decode(token);
+
+            // Kiểm tra token có hết hạn không
+            Instant expiration = jwt.getExpiresAt();
+            if (expiration != null && expiration.isBefore(Instant.now())) {
+                throw new JwtException("Token expired");
+            }
+
+            return jwt;
         } catch (Exception e) {
-            System.out.println(">>> Refesh token error: " + e.getMessage());
+            System.out.println(">>> token error: " + e.getMessage());
             throw e;
         }
+    }
+
+    public boolean checkValidTokenB(String token){
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
+                getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
+
+        try {
+            Jwt jwt = jwtDecoder.decode(token);
+
+            // Kiểm tra token có hết hạn không
+            Instant expiration = jwt.getExpiresAt();
+            if (expiration != null && expiration.isBefore(Instant.now())) {
+                throw new JwtException("Token expired");
+            }
+
+            return true;
+        } catch (Exception e) {
+            System.out.println(">>> token error: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public String getUserNameFromToken(String token){
+        Jwt jwt = checkValidToken(token);
+        return jwt.getSubject();
     }
 
     /**
