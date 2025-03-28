@@ -13,6 +13,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.management.Notification;
+
 //domain driven design
 @Entity
 @Table(name = "users")
@@ -93,6 +95,11 @@ public class User {
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<ImportReceipt> importReceipts;
+
+    // one user have many notifications
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Notifications> notifications;
 
     @PrePersist // action before save
     public void handleBeforeCreate() {
