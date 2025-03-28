@@ -305,6 +305,11 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+    //get list userid
+    public List<User> getListUsersActive() {
+        return this.userRepository.findAllUsersActive();
+    }
+
     //if after 7 day, user not active account, account will be deleted
     //cron run every saturday (8 AM)
     @Scheduled(cron = "0 0 8 ? * SAT")
