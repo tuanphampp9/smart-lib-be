@@ -168,6 +168,7 @@ public class WarehouseService {
                 publication.setPublicationName(p.getName());
                 //handle quantity publication
                 publication.setQuantity(countQuantityPublication(p.getId()));
+                long availableQuantity = countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.AVAILABLE);
                 publication.setAvailableQuantity(countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.AVAILABLE));
                 publication.setBorrowedQuantity(countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.BORROWED));
                 publication.setLostQuantity(countQuantityPublicationByStatus(p.getId(), PublicationStatusEnum.LOST));

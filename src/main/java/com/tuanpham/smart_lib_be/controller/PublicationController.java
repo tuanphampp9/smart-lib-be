@@ -81,10 +81,10 @@ public class PublicationController {
     }
 
     //get list publication suggestion
-    @GetMapping("/publications/suggestions/{id}")
+    @GetMapping("/publications/suggestions-books/{bookId}/user/{userId}")
     public ResponseEntity<List<Publication>> getPublicationSuggestions(
-            @PathVariable("id") Long id
+            @PathVariable("bookId") Long bookId, @PathVariable("userId") String userId
     ) throws IOException {
-        return ResponseEntity.ok().body(this.publicationService.handleGetPublicationSuggestions(id));
+        return ResponseEntity.ok().body(this.publicationService.handleGetPublicationSuggestions(bookId, userId));
     }
 }

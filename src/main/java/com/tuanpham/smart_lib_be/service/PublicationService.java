@@ -16,8 +16,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class PublicationService {
@@ -152,6 +155,30 @@ public class PublicationService {
     }
 
     public Publication handleCreatePublication(Publication publication) {
+        //handle data publication to convert data tags
+        List<Author> authors = publication.getAuthors();
+        List<Topic> topics = publication.getTopics();
+        List<Category> categories = publication.getCategories();
+
+        List<String> mergedArray = new ArrayList<>();
+        authors.forEach(a ->{
+            Author dbAuthor = this.authorRepository.findById(a.getId()).orElse(null);
+            mergedArray.add(dbAuthor.getFullName());
+        });
+        topics.forEach(
+                t ->{
+                    Topic dbTopic = this.topicRepository.findById(t.getId()).orElse(null);
+                    mergedArray.add(dbTopic.getName());
+                });
+        categories.forEach(
+                c ->{
+                    Category dbCategory = this.categoryRepository.findById(c.getId()).orElse(null);
+                    mergedArray.add(dbCategory.getName());
+                });
+        String jsonString = mergedArray.stream()
+                .map(s -> "\"" + s + "\"") // thêm dấu ngoặc kép cho từng phần tử
+                .collect(Collectors.joining(",", "[", "]"));
+        publication.setTags(jsonString);
         createDataPublication(publication);
         return this.publicationRepository.save(publication);
     }
@@ -227,12 +254,12 @@ public class PublicationService {
         return resultPaginationDTO;
     }
 
-    public List<Publication> handleGetPublicationSuggestions(Long id) {
+    public List<Publication> handleGetPublicationSuggestions(Long id, String userId) {
         WebClient webClient = WebClient.create("http://localhost:8000");
 
         // Gọi API và chờ kết quả JSON
         String jsonResponse = webClient.get()
-                .uri("/recommendations/" + id)
+                .uri("/recommendations-books/" + id+ "/user/"+ userId)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block(); // Chờ lấy dữ liệu

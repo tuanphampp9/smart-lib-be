@@ -101,6 +101,11 @@ public class User {
     @JsonIgnore
     private List<Notifications> notifications;
 
+    //column interests
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String interests;
+
+
     @PrePersist // action before save
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";

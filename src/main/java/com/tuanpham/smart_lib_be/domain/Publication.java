@@ -94,6 +94,10 @@ public class Publication {
     private String createdBy;
     private String updatedBy;
 
+    //column tags use compare with interests of user
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String tags;
+
     @PrePersist // action before save
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";

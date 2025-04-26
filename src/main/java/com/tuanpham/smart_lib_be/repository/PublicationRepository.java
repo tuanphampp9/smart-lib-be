@@ -24,7 +24,7 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
             """
             SELECT COALESCE(count(*),0) FROM import_receipt_details inner join registration_unique
                                     on import_receipt_details.id = registration_unique.import_receipt_detail_id
-                                    where registration_unique.import_receipt_detail_id = ?1
+                                    where import_receipt_details.publication_id = ?1
                                     and registration_unique.status= ?2
             """, nativeQuery = true)
     long countPublicationByStatus(Long publicationId, PublicationStatusEnum status);

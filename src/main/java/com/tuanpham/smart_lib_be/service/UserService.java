@@ -4,6 +4,7 @@ import com.tuanpham.smart_lib_be.domain.*;
 import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
 import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
 import com.tuanpham.smart_lib_be.domain.Request.ReqForgetPassword;
+import com.tuanpham.smart_lib_be.domain.Request.UserInterestReq;
 import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.mapper.BorrowSlipMapper;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
@@ -308,6 +309,15 @@ public class UserService {
     //get list userid
     public List<User> getListUsersActive() {
         return this.userRepository.findAllUsersActive();
+    }
+
+    public void handleAddInterestUser(UserInterestReq userInterestReq) throws IdInvalidException {
+        User user = this.userRepository.findById(userInterestReq.getUserId()).orElse(null);
+        if (user == null) {
+            throw new IdInvalidException("Người dùng không tồn tại");
+        }
+        user.setInterests(userInterestReq.getInterests());
+        this.userRepository.save(user);
     }
 
     //if after 7 day, user not active account, account will be deleted

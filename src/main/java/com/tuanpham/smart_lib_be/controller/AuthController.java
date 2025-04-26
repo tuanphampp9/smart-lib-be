@@ -192,12 +192,13 @@ public class AuthController {
                 if (isEmailExist) {
                         throw new IdInvalidException("Email is exist");
                 }
+                //send email to user
+                this.emailService.sendSimpleEmail(user.getEmail(), "Thông báo đăng ký thành công tài khoản thẻ của bạn đọc", "Trong thời gian 7 ngày, bạn đọc vui lòng đến thư viện để được cấp thẻ. Sau thời gian này đăng ký này sẽ không còn hiệu lực. Xin chân thành cảm ơn!");
                 user.setActive(false);
                 //set role reader
                 user.setRole(this.roleService.handleGetRoleById(2));
                 User newUser = this.userService.handleCreateUser(user);
-                //send email to user
-                this.emailService.sendSimpleEmail(newUser.getEmail(), "Thông báo đăng ký thành công tài khoản thẻ của bạn đọc", "Trong thời gian 7 ngày, bạn đọc vui lòng đến thư viện để được cấp thẻ. Sau thời gian này đăng ký này sẽ không còn hiệu lực. Xin chân thành cảm ơn!");
+
                 return ResponseEntity.status(HttpStatus.CREATED)
                                 .body(this.userMapper.toResCreateUserDTO(newUser));
         }

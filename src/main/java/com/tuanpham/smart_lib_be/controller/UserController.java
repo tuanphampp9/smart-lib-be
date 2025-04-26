@@ -1,12 +1,8 @@
 package com.tuanpham.smart_lib_be.controller;
 
-import com.tuanpham.smart_lib_be.domain.BorrowSlip;
 import com.tuanpham.smart_lib_be.domain.CardRead;
 import com.tuanpham.smart_lib_be.domain.CartUser;
-import com.tuanpham.smart_lib_be.domain.Request.CartUserReq;
-import com.tuanpham.smart_lib_be.domain.Request.PubRatingReq;
-import com.tuanpham.smart_lib_be.domain.Request.ReqChangePassword;
-import com.tuanpham.smart_lib_be.domain.Request.ReqForgetPassword;
+import com.tuanpham.smart_lib_be.domain.Request.*;
 import com.tuanpham.smart_lib_be.domain.Response.*;
 import com.tuanpham.smart_lib_be.domain.User;
 import com.tuanpham.smart_lib_be.mapper.UserMapper;
@@ -25,8 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -188,6 +182,15 @@ public class UserController {
     @PostMapping("/users/forget-password")
     public ResponseEntity<User> forgetPassword(@RequestBody ReqForgetPassword reqForgetPassword) throws IdInvalidException {
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleForgetPassword(reqForgetPassword));
+    }
+
+    // api add favorite user to train the model content-based recommendation
+    @PostMapping("/users/interests")
+    public ResponseEntity<RestResponse<String>> addInterestUser(@RequestBody UserInterestReq userInterestReq) throws IdInvalidException {
+        this.userService.handleAddInterestUser(userInterestReq);
+        RestResponse<String> restResponse = new RestResponse<>();
+        restResponse.setData("Thêm sở thích thành công");
+        return ResponseEntity.status(HttpStatus.OK).body(restResponse);
     }
 
 }

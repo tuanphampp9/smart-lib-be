@@ -36,6 +36,7 @@ public class ResUserDTO {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "serves"})// ignore serves
     private CardRead cardRead;
     private List<CartUserRes> cartUsers;
+    private String interests;
 
 
     @Getter
